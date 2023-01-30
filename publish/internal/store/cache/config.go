@@ -12,7 +12,7 @@ type Config struct {
 }
 
 func (c *Config) Key() string {
-	return "douyin/cache"
+	return "tiktok/cache"
 }
 
 var C Config

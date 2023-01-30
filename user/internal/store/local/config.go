@@ -14,7 +14,7 @@ type Config struct {
 }
 
 func (c *Config) Key() string {
-	return "douyin/local"
+	return "tiktok/local"
 }
 
 var C Config
