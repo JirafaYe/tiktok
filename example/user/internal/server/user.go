@@ -11,6 +11,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// UserSrv grpc中关于user相关的服务具体实现
 type UserSrv struct {
 	service.UnimplementedUserServer
 }
