@@ -5,6 +5,7 @@ import (
 	"log"
 
 	consul "github.com/hashicorp/consul/api"
+	_ "github.com/mbobakov/grpc-consul-resolver"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
