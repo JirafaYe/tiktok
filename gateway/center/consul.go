@@ -25,6 +25,7 @@ func init() {
 	}
 }
 
+// GetValue consul KV读取
 func GetValue(key string) ([]byte, error) {
 	res, _, err := client.KV().Get(key, nil)
 	if err != nil {
@@ -33,12 +34,14 @@ func GetValue(key string) ([]byte, error) {
 	return res.Value, nil
 }
 
+// Register consul服务注册
 func Register(reg consul.AgentServiceRegistration) error {
 	agent := client.Agent()
 
 	return agent.ServiceRegister(&reg)
 }
 
+// Resolver 对服务进行负载均衡
 func Resolver(name string) (*grpc.ClientConn, error) {
 	conn, err := grpc.Dial(
 		// name 拉取的服务名 wait=14s 等待时间 tag=manual 筛选条件
