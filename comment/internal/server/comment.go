@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"github.com/JirafaYe/comment/internal/service"
 	"github.com/JirafaYe/comment/internal/store/local"
 	"log"
@@ -13,6 +14,13 @@ type CommentServer struct {
 
 func (c *CommentServer) OperateComment(ctx context.Context, req *service.CommentRequest) (*service.CommentOperationResponse, error) {
 	comment := ConvertCommentRequest(req)
+
+	//测试user
+	user := &service.User{
+		Id:   1,
+		Name: "user",
+	}
+
 	var err error
 	if req.ActionType == 1 {
 		err = m.localer.InsertComment(&comment)
@@ -25,25 +33,28 @@ func (c *CommentServer) OperateComment(ctx context.Context, req *service.Comment
 			log.Print("删除评论失败", err)
 		}
 	}
-	reponse := &service.CommentOperationResponse{
-		Comment: ConvertCommentBody(comment),
-	}
 
-	return reponse, err
+	return &service.CommentOperationResponse{
+		StatusCode: 0,
+		StatusMsg:  "success",
+		Comment:    ConvertCommentBody(comment, user),
+	}, err
 }
 
 func ConvertCommentRequest(request *service.CommentRequest) local.Comment {
 	return local.Comment{
+		Id:       request.CommentId,
 		AuthorId: request.AuthorId,
 		VideoId:  request.VideoId,
 		Msg:      request.Msg,
 	}
 }
 
-func ConvertCommentBody(c local.Comment) *service.CommentBody {
+func ConvertCommentBody(c local.Comment, u *service.User) *service.CommentBody {
 	return &service.CommentBody{
 		Id:         c.Id,
+		User:       u,
 		Content:    c.Msg,
-		CreateDate: c.CreatedAt.String(),
+		CreateDate: fmt.Sprintf("%d-%d", int(c.CreatedAt.Month()), c.CreatedAt.Day()),
 	}
 }
