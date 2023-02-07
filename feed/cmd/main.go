@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	addr = flag.String("addr", "192.168.79.83", "The server address")
+	addr = flag.String("addr", "127.0.0.1", "The server address")
 	port = flag.Int("port", 8899, "The server port")
 )
 
