@@ -16,7 +16,7 @@ func (c *CommentServer) OperateComment(ctx context.Context, req *service.Comment
 	comment := ConvertCommentRequest(req)
 
 	//测试user
-	user := &service.User{
+	user := &service.CommentUser{
 		Id:   1,
 		Name: "user",
 	}
@@ -50,7 +50,7 @@ func ConvertCommentRequest(request *service.CommentRequest) local.Comment {
 	}
 }
 
-func ConvertCommentBody(c local.Comment, u *service.User) *service.CommentBody {
+func ConvertCommentBody(c local.Comment, u *service.CommentUser) *service.CommentBody {
 	return &service.CommentBody{
 		Id:         c.Id,
 		User:       u,
