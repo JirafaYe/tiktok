@@ -7,8 +7,8 @@ import (
 // publish的路由
 
 func (m *Manager) RoutePublish() {
-	m.handler.POST("/douyin/publish/action", m.publishAction)
-	m.handler.GET("/douyin/publish/list", m.publishList)
+	m.handler.POST("/douyin/publish/action", m.action)
+	m.handler.GET("/douyin/publish/list", m.list)
 }
 
 func (m *Manager) action(ctx *gin.Context) {
