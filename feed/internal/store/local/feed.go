@@ -18,12 +18,14 @@ type Video struct {
 
 type User struct {
 	gorm.Model
-	Name string `gorm:"column:name; type:varchar(200)"`
+	Name          string `gorm:"column:name; type:varchar(200)"`
+	FollowerCount int64  `gorm:"column:follower_count; type:bigint"`
+	FollowCount   int64  `gorm:"column:follow_count; type:bigint"`
 }
 
 func (m *Manager) QueryVideosAfter(n int, date time.Time) (videos []*Video) {
 	db := m.handler.Table("t_video")
-	db.Where("created_at > ?", date).Limit(n).Find(&videos)
+	db.Where("created_at < ?", date).Order("created_at desc").Limit(n).Find(&videos)
 	return
 }
 
@@ -32,5 +34,11 @@ func (m *Manager) QueryNameById(id int64) (name string) {
 	var user User
 	db.Where("id = ?", id).Find(&user)
 	name = user.Name
+	return
+}
+
+func (m *Manager) QueryUserById(id int64) (user User) {
+	db := m.handler.Table("t_user")
+	db.Where("id = ?", id).Find(&user)
 	return
 }
