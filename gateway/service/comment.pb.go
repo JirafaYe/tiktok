@@ -167,10 +167,10 @@ type CommentBody struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Id         int32  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	User       *User  `protobuf:"bytes,2,opt,name=user,proto3" json:"user,omitempty"`
-	Content    string `protobuf:"bytes,3,opt,name=content,proto3" json:"content,omitempty"`
-	CreateDate string `protobuf:"bytes,4,opt,name=create_date,json=createDate,proto3" json:"create_date,omitempty"`
+	Id         int32        `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	User       *CommentUser `protobuf:"bytes,2,opt,name=user,proto3" json:"user,omitempty"`
+	Content    string       `protobuf:"bytes,3,opt,name=content,proto3" json:"content,omitempty"`
+	CreateDate string       `protobuf:"bytes,4,opt,name=create_date,json=createDate,proto3" json:"create_date,omitempty"`
 }
 
 func (x *CommentBody) Reset() {
@@ -212,7 +212,7 @@ func (x *CommentBody) GetId() int32 {
 	return 0
 }
 
-func (x *CommentBody) GetUser() *User {
+func (x *CommentBody) GetUser() *CommentUser {
 	if x != nil {
 		return x.User
 	}
@@ -233,7 +233,7 @@ func (x *CommentBody) GetCreateDate() string {
 	return ""
 }
 
-type User struct {
+type CommentUser struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
@@ -245,8 +245,8 @@ type User struct {
 	IsFollow      bool   `protobuf:"varint,5,opt,name=is_follow,json=isFollow,proto3" json:"is_follow,omitempty"`
 }
 
-func (x *User) Reset() {
-	*x = User{}
+func (x *CommentUser) Reset() {
+	*x = CommentUser{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_comment_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -254,13 +254,13 @@ func (x *User) Reset() {
 	}
 }
 
-func (x *User) String() string {
+func (x *CommentUser) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*User) ProtoMessage() {}
+func (*CommentUser) ProtoMessage() {}
 
-func (x *User) ProtoReflect() protoreflect.Message {
+func (x *CommentUser) ProtoReflect() protoreflect.Message {
 	mi := &file_comment_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -272,40 +272,40 @@ func (x *User) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use User.ProtoReflect.Descriptor instead.
-func (*User) Descriptor() ([]byte, []int) {
+// Deprecated: Use CommentUser.ProtoReflect.Descriptor instead.
+func (*CommentUser) Descriptor() ([]byte, []int) {
 	return file_comment_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *User) GetId() int64 {
+func (x *CommentUser) GetId() int64 {
 	if x != nil {
 		return x.Id
 	}
 	return 0
 }
 
-func (x *User) GetName() string {
+func (x *CommentUser) GetName() string {
 	if x != nil {
 		return x.Name
 	}
 	return ""
 }
 
-func (x *User) GetFollowCount() int64 {
+func (x *CommentUser) GetFollowCount() int64 {
 	if x != nil && x.FollowCount != nil {
 		return *x.FollowCount
 	}
 	return 0
 }
 
-func (x *User) GetFollowerCount() int64 {
+func (x *CommentUser) GetFollowerCount() int64 {
 	if x != nil && x.FollowerCount != nil {
 		return *x.FollowerCount
 	}
 	return 0
 }
 
-func (x *User) GetIsFollow() bool {
+func (x *CommentUser) GetIsFollow() bool {
 	if x != nil {
 		return x.IsFollow
 	}
@@ -381,11 +381,11 @@ var file_comment_proto_goTypes = []interface{}{
 	(*CommentRequest)(nil),           // 0: service.CommentRequest
 	(*CommentOperationResponse)(nil), // 1: service.CommentOperationResponse
 	(*CommentBody)(nil),              // 2: service.CommentBody
-	(*User)(nil),                     // 3: service.User
+	(*CommentUser)(nil),              // 3: service.CommentUser
 }
 var file_comment_proto_depIdxs = []int32{
 	2, // 0: service.CommentOperationResponse.comment:type_name -> service.CommentBody
-	3, // 1: service.CommentBody.user:type_name -> service.User
+	3, // 1: service.CommentBody.user:type_name -> service.CommentUser
 	0, // 2: service.Comment.OperateComment:input_type -> service.CommentRequest
 	1, // 3: service.Comment.OperateComment:output_type -> service.CommentOperationResponse
 	3, // [3:4] is the sub-list for method output_type
@@ -438,7 +438,7 @@ func file_comment_proto_init() {
 			}
 		}
 		file_comment_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*User); i {
+			switch v := v.(*CommentUser); i {
 			case 0:
 				return &v.state
 			case 1:
