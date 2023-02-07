@@ -10,13 +10,13 @@ message tiktok_feed_request{
 message tiktok_feed_response {
   int32 status_code = 1;
   optional string status_msg = 2;
-  repeated Video video_list = 3;
+  repeated VideoFeed video_list = 3;
   optional int64 next_time = 4;
 }
 
-message Video {
+message VideoFeed {
   int64 id = 1;
-  User author = 2;
+  UserFeed author = 2;
   string play_url = 3;
   string cover_url = 4;
   int64 favorite_count = 5;
@@ -25,7 +25,7 @@ message Video {
   string title = 8;
 }
 
-message User {
+message UserFeed {
   int64 id = 1;
   string name = 2;
   optional int64 follow_count = 3;  // 关注总数

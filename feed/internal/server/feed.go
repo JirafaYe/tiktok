@@ -16,9 +16,10 @@ type FeedServer struct {
 	service.UnimplementedFeedServer
 }
 
+// FeedVideo
+// TODO: 添加对token和time的错误处理
 func (f *FeedServer) FeedVideo(ctx context.Context, request *service.TiktokFeedRequest) (*service.TiktokFeedResponse, error) {
 	var response service.TiktokFeedResponse
-	// 先查30个视频
 	response.StatusCode = 0
 	response.StatusMsg = util.NewString("OK")
 	t := time.UnixMilli(*request.LatestTime)
@@ -27,9 +28,9 @@ func (f *FeedServer) FeedVideo(ctx context.Context, request *service.TiktokFeedR
 	for _, v := range videos {
 		user := m.localer.QueryUserById(int64(v.UserId))
 		latestTime = util.Max(v.CreatedAt.UnixMilli(), latestTime)
-		response.VideoList = append(response.VideoList, &service.Video{
+		response.VideoList = append(response.VideoList, &service.VideoFeed{
 			Id: v.UserId,
-			Author: &service.User{
+			Author: &service.UserFeed{
 				Id:            int64(user.ID),
 				Name:          user.Name,
 				FollowerCount: &user.FollowerCount,
