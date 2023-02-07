@@ -1,9 +1,9 @@
 package obs
 
 func GetVideoPrefix() string {
-	return C.Address + "/videos/"
+	return "http://" + C.Address + "/videos/"
 }
 
 func GetImagePrefix() string {
-	return C.Address + "/images/"
+	return "http://" + C.Address + "/images/"
 }
