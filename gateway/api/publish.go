@@ -11,10 +11,10 @@ func (m *Manager) RoutePublish() {
 	m.handler.GET("/douyin/publish/list", m.list)
 }
 
-func (m *Manager) publishAction(ctx *gin.Context) {
+func (m *Manager) action(ctx *gin.Context) {
 
 }
 
-func (m *Manager) publishList(ctx *gin.Context) {
+func (m *Manager) list(ctx *gin.Context) {
 
 }

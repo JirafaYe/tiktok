@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "./service;service";
+option go_package = "./internal/service;service";
 
 package service;
 
@@ -37,8 +37,25 @@ message IsLoginResponse {
   string msg = 2;
 }
 
-service User {
+message UserRequest{
+  int64 user_id = 1;
+  string token = 2;
+}
+message UserResponse{
+  int32 status_code = 1;
+  string status_msg = 2;
+  UserMsg user = 3;
+}
+message UserMsg{
+  int64 id = 1;
+  string name = 2;
+  int32 follow_count = 3;
+  int32 follower_count = 4;
+  bool is_follow = 5;
+}
+service UserProto{
   rpc Login(LoginRequest) returns (LoginResponse) {}
   rpc Register(RegisterRequest) returns (RegisterResponse) {}
   rpc IsLogin(IsLoginRequest)returns (IsLoginResponse){}
+  rpc GetUserMsg(UserRequest)returns (UserResponse){}
 }
