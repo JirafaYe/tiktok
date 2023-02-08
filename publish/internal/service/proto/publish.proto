@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "./internal/service;service";
+option go_package = "./service;service";
 
 package service;
 

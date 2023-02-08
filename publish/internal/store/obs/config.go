@@ -7,7 +7,7 @@ import (
 
 type Config struct {
 	Address   string `json:"address"`
-	SecretID  string `json:"secret_id"`
+	SecretId  string `json:"secret_id"`
 	SecretKey string `json:"secret_key"`
 }
 
