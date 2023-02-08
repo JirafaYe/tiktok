@@ -1,7 +1,6 @@
 package local
 
 import (
-	"fmt"
 	"github.com/JirafaYe/user/pkg"
 	"strconv"
 	"strings"
@@ -61,12 +60,17 @@ func (m *Manager) Login(username, password string) (bool, int64, error) {
 		panic(err)
 		return false, u.ID, err
 	}
-	fmt.Println(u.Password)
 	pwd := strings.Split(u.Password, "$")
-	fmt.Println(pwd[1])
-	fmt.Println(pwd[2])
-	fmt.Println(password)
 	userPassword := pkg.VerifyUserPassword(password, pwd[1], pwd[2])
-	fmt.Println(userPassword)
 	return userPassword, u.ID, nil
+}
+
+func (m *Manager) GetUserMsg(username string) User {
+	var u User
+	err := m.handler.Table(user).Where("username=?", username).First(&u).Error
+	if err != nil {
+		panic(err)
+		return u
+	}
+	return u
 }

@@ -3,11 +3,13 @@ module github.com/JirafaYe/user
 go 1.18
 
 require (
+	github.com/bwmarrin/snowflake v0.3.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/hashicorp/consul/api v1.18.0
-	golang.org/x/crypto v0.0.0-20190923035154-9ee001bba392
-	google.golang.org/grpc v1.52.0
+	github.com/onsi/gomega v1.18.1
+	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
+	google.golang.org/grpc v1.52.0-dev
 	google.golang.org/protobuf v1.28.1
 	gorm.io/driver/mysql v1.4.5
 	gorm.io/gorm v1.24.3
@@ -35,5 +37,6 @@ require (
 	golang.org/x/net v0.4.0 // indirect
 	golang.org/x/sys v0.3.0 // indirect
 	golang.org/x/text v0.5.0 // indirect
-	google.golang.org/genproto v0.0.0-20221118155620-16455021b5e6 // indirect
+	google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013 // indirect
+	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

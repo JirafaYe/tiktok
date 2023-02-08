@@ -7,7 +7,7 @@ import (
 )
 
 type UserSrv struct {
-	service.UnimplementedUserServer
+	service.UnimplementedUserProtoServer
 }
 
 func (u *UserSrv) Register(_ context.Context, request *service.RegisterRequest) (*service.RegisterResponse, error) {
@@ -94,4 +94,30 @@ func (u *UserSrv) IsLogin(_ context.Context, request *service.IsLoginRequest) (*
 			Msg:  "获取失败",
 		}, nil
 	}
+}
+
+func (u *UserSrv) GetUserMsg(_ context.Context, request *service.UserRequest) (*service.UserResponse, error) {
+	token := request.Token
+	claims, err := pkg.ParseToken(token)
+	if err != nil {
+		return &service.UserResponse{
+			StatusCode: 1,
+			StatusMsg:  "token解析错误",
+			User:       nil,
+		}, err
+	}
+	username := claims.Username
+	userMsg := m.localer.GetUserMsg(username)
+	usg := &service.UserMsg{
+		Id:            userMsg.ID,
+		Name:          userMsg.Name,
+		FollowCount:   0,
+		FollowerCount: 0,
+		IsFollow:      false,
+	}
+	return &service.UserResponse{
+		StatusCode: 0,
+		StatusMsg:  "获取成功",
+		User:       usg,
+	}, nil
 }

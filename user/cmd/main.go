@@ -25,7 +25,7 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	s := grpc.NewServer()
-	service.RegisterUserServer(s, &server.UserSrv{})
+	service.RegisterUserProtoServer(s, &server.UserSrv{})
 	// 健康检查
 	grpc_health_v1.RegisterHealthServer(s, &server.HealthImpl{})
 
