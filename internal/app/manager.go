@@ -30,7 +30,7 @@ func init() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	obs, err := obs.New()
+	obser, err := obs.New()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -40,7 +40,7 @@ func init() {
 	m = &Manager{
 		localer:  localer,
 		cacher:   cacher,
-		obser:    obs,
+		obser:    obser,
 		cryptoer: cryptoer,
 		logger:   logger,
 	}
