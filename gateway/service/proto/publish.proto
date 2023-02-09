@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+option go_package = "../service";
+
+package service;
+
+// publish action, POST
+
+message PublishActionRequest {
+    string token = 1;
+    bytes data = 2;
+    string title = 3;
+}
+
+message PublishActionResponse {
+    int32 status_code = 1;
+    string status_msg = 2;
+}
+
+// GET list
+
+message PublishListRequest {
+    int64 user_id = 1;
+    string token = 2;
+}
+
+message PublishListResponse {
+    int32 status_code = 1;
+    string status_msg = 2;
+    PubVideo video_list = 3;
+}
+
+message PubVideo {
+    int64 id = 1;
+    PubUser author = 2;
+    string play_url = 3;
+    string cover_url = 4;
+    int64 favorite_count = 5;
+    int64 comment_count = 6;
+    bool is_favorite = 7;
+    string title = 8;
+}
+
+message PubUser {
+    int64 id = 1;
+    string name = 2;
+    int64 follow_count = 3;
+    int64 follower_count = 4;
+    bool is_follow= 5;
+}
+
+service Publish {
+    rpc PubAction (PublishActionRequest) returns (PublishActionResponse);
+    rpc PubList (PublishListRequest) returns (PublishListResponse);
+}

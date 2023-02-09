@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v3.6.1
-// source: internal/service/proto/publish.proto
+// source: proto/publish.proto
 
 package service
 
@@ -22,8 +22,8 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PublishClient interface {
-	Action(ctx context.Context, in *DouyinPublishActionRequest, opts ...grpc.CallOption) (*DouyinPublishActionResponse, error)
-	List(ctx context.Context, in *DouyinPublishListRequest, opts ...grpc.CallOption) (*DouyinPublishListResponse, error)
+	PubAction(ctx context.Context, in *PublishActionRequest, opts ...grpc.CallOption) (*PublishActionResponse, error)
+	PubList(ctx context.Context, in *PublishListRequest, opts ...grpc.CallOption) (*PublishListResponse, error)
 }
 
 type publishClient struct {
@@ -34,18 +34,18 @@ func NewPublishClient(cc grpc.ClientConnInterface) PublishClient {
 	return &publishClient{cc}
 }
 
-func (c *publishClient) Action(ctx context.Context, in *DouyinPublishActionRequest, opts ...grpc.CallOption) (*DouyinPublishActionResponse, error) {
-	out := new(DouyinPublishActionResponse)
-	err := c.cc.Invoke(ctx, "/service.Publish/Action", in, out, opts...)
+func (c *publishClient) PubAction(ctx context.Context, in *PublishActionRequest, opts ...grpc.CallOption) (*PublishActionResponse, error) {
+	out := new(PublishActionResponse)
+	err := c.cc.Invoke(ctx, "/service.Publish/PubAction", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *publishClient) List(ctx context.Context, in *DouyinPublishListRequest, opts ...grpc.CallOption) (*DouyinPublishListResponse, error) {
-	out := new(DouyinPublishListResponse)
-	err := c.cc.Invoke(ctx, "/service.Publish/List", in, out, opts...)
+func (c *publishClient) PubList(ctx context.Context, in *PublishListRequest, opts ...grpc.CallOption) (*PublishListResponse, error) {
+	out := new(PublishListResponse)
+	err := c.cc.Invoke(ctx, "/service.Publish/PubList", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -56,8 +56,8 @@ func (c *publishClient) List(ctx context.Context, in *DouyinPublishListRequest, 
 // All implementations must embed UnimplementedPublishServer
 // for forward compatibility
 type PublishServer interface {
-	Action(context.Context, *DouyinPublishActionRequest) (*DouyinPublishActionResponse, error)
-	List(context.Context, *DouyinPublishListRequest) (*DouyinPublishListResponse, error)
+	PubAction(context.Context, *PublishActionRequest) (*PublishActionResponse, error)
+	PubList(context.Context, *PublishListRequest) (*PublishListResponse, error)
 	mustEmbedUnimplementedPublishServer()
 }
 
@@ -65,11 +65,11 @@ type PublishServer interface {
 type UnimplementedPublishServer struct {
 }
 
-func (UnimplementedPublishServer) Action(context.Context, *DouyinPublishActionRequest) (*DouyinPublishActionResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Action not implemented")
+func (UnimplementedPublishServer) PubAction(context.Context, *PublishActionRequest) (*PublishActionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PubAction not implemented")
 }
-func (UnimplementedPublishServer) List(context.Context, *DouyinPublishListRequest) (*DouyinPublishListResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method List not implemented")
+func (UnimplementedPublishServer) PubList(context.Context, *PublishListRequest) (*PublishListResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PubList not implemented")
 }
 func (UnimplementedPublishServer) mustEmbedUnimplementedPublishServer() {}
 
@@ -84,38 +84,38 @@ func RegisterPublishServer(s grpc.ServiceRegistrar, srv PublishServer) {
 	s.RegisterService(&Publish_ServiceDesc, srv)
 }
 
-func _Publish_Action_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DouyinPublishActionRequest)
+func _Publish_PubAction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PublishActionRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(PublishServer).Action(ctx, in)
+		return srv.(PublishServer).PubAction(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/service.Publish/Action",
+		FullMethod: "/service.Publish/PubAction",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PublishServer).Action(ctx, req.(*DouyinPublishActionRequest))
+		return srv.(PublishServer).PubAction(ctx, req.(*PublishActionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Publish_List_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DouyinPublishListRequest)
+func _Publish_PubList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PublishListRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(PublishServer).List(ctx, in)
+		return srv.(PublishServer).PubList(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/service.Publish/List",
+		FullMethod: "/service.Publish/PubList",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PublishServer).List(ctx, req.(*DouyinPublishListRequest))
+		return srv.(PublishServer).PubList(ctx, req.(*PublishListRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -128,14 +128,14 @@ var Publish_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*PublishServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Action",
-			Handler:    _Publish_Action_Handler,
+			MethodName: "PubAction",
+			Handler:    _Publish_PubAction_Handler,
 		},
 		{
-			MethodName: "List",
-			Handler:    _Publish_List_Handler,
+			MethodName: "PubList",
+			Handler:    _Publish_PubList_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "internal/service/proto/publish.proto",
+	Metadata: "proto/publish.proto",
 }

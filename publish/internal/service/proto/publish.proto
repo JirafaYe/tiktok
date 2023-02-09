@@ -1,38 +1,38 @@
 syntax = "proto3";
 
-option go_package = "./service;service";
+option go_package = "../service";
 
 package service;
 
 // publish action, POST
 
-message douyin_publish_action_request {
+message PublishActionRequest {
     string token = 1;
     bytes data = 2;
     string title = 3;
 }
 
-message douyin_publish_action_response {
+message PublishActionResponse {
     int32 status_code = 1;
     string status_msg = 2;
 }
 
 // GET list
 
-message douyin_publish_list_request {
+message PublishListRequest {
     int64 user_id = 1;
     string token = 2;
 }
 
-message douyin_publish_list_response {
+message PublishListResponse {
     int32 status_code = 1;
     string status_msg = 2;
-    Video video_list = 3;
+    PubVideo video_list = 3;
 }
 
-message Video {
+message PubVideo {
     int64 id = 1;
-    User author = 2;
+    PubUser author = 2;
     string play_url = 3;
     string cover_url = 4;
     int64 favorite_count = 5;
@@ -41,7 +41,7 @@ message Video {
     string title = 8;
 }
 
-message User {
+message PubUser {
     int64 id = 1;
     string name = 2;
     int64 follow_count = 3;
@@ -50,6 +50,6 @@ message User {
 }
 
 service Publish {
-    rpc Action (douyin_publish_action_request) returns (douyin_publish_action_response);
-    rpc List (douyin_publish_list_request) returns (douyin_publish_list_response);
+    rpc PubAction (PublishActionRequest) returns (PublishActionResponse);
+    rpc PubList (PublishListRequest) returns (PublishListResponse);
 }
