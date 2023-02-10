@@ -9,7 +9,7 @@ require (
 	github.com/hashicorp/consul/api v1.18.0
 	github.com/mbobakov/grpc-consul-resolver v1.4.4
 	github.com/minio/minio-go/v7 v7.0.47
-	google.golang.org/grpc v1.53.0
+	google.golang.org/grpc v1.52.0
 	gorm.io/driver/mysql v1.4.6
 	gorm.io/gorm v1.24.5
 )
