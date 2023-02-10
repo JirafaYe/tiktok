@@ -3,9 +3,9 @@ package app
 import (
 	"log"
 
-	cache "github.com/JirafaYe/tiktok/internal/pkg/cacher"
-	crypto "github.com/JirafaYe/tiktok/internal/pkg/cryptoer"
-	local "github.com/JirafaYe/tiktok/internal/pkg/dba"
+	"github.com/JirafaYe/tiktok/internal/pkg/cacher"
+	"github.com/JirafaYe/tiktok/internal/pkg/cryptoer"
+	"github.com/JirafaYe/tiktok/internal/pkg/dba"
 	"github.com/JirafaYe/tiktok/internal/pkg/logger"
 	"github.com/JirafaYe/tiktok/internal/pkg/obs"
 )
@@ -13,20 +13,20 @@ import (
 var m *Manager
 
 type Manager struct {
-	cacher   *cache.Manager
-	localer  *local.Manager
-	cryptoer *crypto.Manager
+	cacher   *cacher.Manager
+	localer  *dba.Manager
+	cryptoer *cryptoer.Manager
 	obser    *obs.Manager
 	logger   *logger.Manager
 }
 
 func init() {
 	var err error
-	localer, err := local.New()
+	localer, err := dba.New()
 	if err != nil {
 		log.Fatal(err)
 	}
-	cacher, err := cache.New()
+	cacher, err := cacher.New()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -34,7 +34,7 @@ func init() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	cryptoer := crypto.New()
+	cryptoer := cryptoer.New()
 	logger := logger.New()
 
 	m = &Manager{
