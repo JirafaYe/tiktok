@@ -29,8 +29,8 @@ message CommentBody{
 message CommentUser{
   int64 id = 1;
   string name = 2;
-  optional int64 follow_count = 3;  // 关注总数
-  optional int64 follower_count = 4;  // 粉丝总数
+  int64 follow_count = 3;  // 关注总数
+  int64 follower_count = 4;  // 粉丝总数
   bool is_follow = 5;
 }
 

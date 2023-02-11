@@ -15,6 +15,19 @@ func (m *Manager) RouteComment() {
 	group.POST("/action", m.Action)
 }
 
+type CommentOperationResponse struct {
+	StatusCode int32       `json:"status_code"`
+	StatusMsg  string      `json:"status_msg"`
+	Comment    CommentBody `json:"comment"`
+}
+
+type CommentBody struct {
+	Id         int32  `json:"id"`
+	User       User   `json:"user"`
+	Content    string `json:"content"`
+	CreateDate string `json:"create_date"`
+}
+
 func (m *Manager) Action(ctx *gin.Context) {
 	log.Printf("请求评论操作")
 	videoId, _ := strconv.Atoi(ctx.Query("video_id"))
@@ -30,7 +43,7 @@ func (m *Manager) Action(ctx *gin.Context) {
 			})
 			return
 		}
-	} else {
+	} else if actionType == 2 {
 		id := ctx.Query("comment_id")
 		if id == "" {
 			ctx.JSON(http.StatusInternalServerError, gin.H{
@@ -40,6 +53,12 @@ func (m *Manager) Action(ctx *gin.Context) {
 			return
 		}
 		commentId, _ = strconv.Atoi(id)
+	} else {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"status_code": http.StatusInternalServerError,
+			"status_msg":  "actionType错误",
+		})
+		return
 	}
 
 	// center.Resolver() 参数为调用的服务名
@@ -70,9 +89,21 @@ func (m *Manager) Action(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"status_code": resp.StatusCode,
-		"status_msg":  resp.StatusMsg,
-		"comment":     resp.Comment,
+	body := CommentBody{
+		Id: resp.Comment.Id,
+		User: User{
+			FollowCount:   resp.Comment.User.FollowerCount,
+			FollowerCount: resp.Comment.User.FollowCount,
+			ID:            resp.Comment.User.Id,
+			IsFollow:      resp.Comment.User.IsFollow,
+			Name:          resp.Comment.User.Name,
+		},
+		Content:    resp.Comment.Content,
+		CreateDate: resp.Comment.CreateDate,
+	}
+	ctx.JSON(http.StatusOK, CommentOperationResponse{
+		StatusCode: resp.StatusCode,
+		StatusMsg:  resp.StatusMsg,
+		Comment:    body,
 	})
 }
