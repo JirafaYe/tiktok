@@ -12,6 +12,32 @@ type CommentServer struct {
 	service.UnimplementedCommentServer
 }
 
+func (c *CommentServer) ListComments(ctx context.Context, req *service.ListRequest) (*service.ListCommentsResponse, error) {
+	//测试user
+	user := &service.CommentUser{
+		Id:   1,
+		Name: "user",
+	}
+
+	commentList, err := m.localer.SelectCommentListByVideoId(req.VideoId)
+	if err != nil {
+		log.Println("获取评论列表失败", err)
+		return nil, err
+	}
+
+	list := make([]*service.CommentBody, len(commentList))
+
+	for i, comment := range commentList {
+		list[i] = ConvertCommentBody(comment, user)
+	}
+
+	return &service.ListCommentsResponse{
+		StatusCode:  0,
+		StatusMsg:   "success",
+		CommentList: list,
+	}, nil
+}
+
 func (c *CommentServer) OperateComment(ctx context.Context, req *service.CommentRequest) (*service.CommentOperationResponse, error) {
 	comment := ConvertCommentRequest(req)
 

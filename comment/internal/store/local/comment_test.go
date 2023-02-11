@@ -43,3 +43,14 @@ func TestSelect(t *testing.T) {
 	}
 	fmt.Printf("有%d条评论", i)
 }
+
+func TestList(t *testing.T) {
+	manager, _ := New()
+	comment, err := manager.SelectCommentListByVideoId(1)
+	if err != nil {
+		fmt.Println(err)
+	}
+	for _, v := range comment {
+		fmt.Println(v)
+	}
+}
