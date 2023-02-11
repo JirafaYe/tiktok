@@ -12,12 +12,21 @@ message CommentRequest{
   string msg=5;
 }
 
+message ListRequest{
+  int32 video_id=1;
+}
+
 message CommentOperationResponse{
   int32 status_code=1;
   string status_msg=2;
   CommentBody comment=3;
 }
 
+message ListCommentsResponse{
+  int32 status_code=1;
+  string status_msg=2;
+  repeated CommentBody comment_list=3;
+}
 
 message CommentBody{
   int32 id=1;
@@ -36,4 +45,5 @@ message CommentUser{
 
 service Comment{
   rpc OperateComment(CommentRequest) returns (CommentOperationResponse) {}
+  rpc ListComments(ListRequest) returns (ListCommentsResponse) {}
 }

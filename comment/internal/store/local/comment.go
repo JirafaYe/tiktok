@@ -35,3 +35,9 @@ func (m *Manager) SelectCommentNumsByVideoId(id int32) (int64, error) {
 	err := m.handler.Model(&Comment{}).Where("video_id=?", id).Count(&cnt).Error
 	return cnt, err
 }
+
+func (m *Manager) SelectCommentListByVideoId(id int32) ([]Comment, error) {
+	var list []Comment
+	err := m.handler.Where("video_id = ?", id).Order("created_at").Find(&list).Error
+	return list, err
+}

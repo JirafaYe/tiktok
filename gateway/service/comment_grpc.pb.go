@@ -23,6 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CommentClient interface {
 	OperateComment(ctx context.Context, in *CommentRequest, opts ...grpc.CallOption) (*CommentOperationResponse, error)
+	ListComments(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListCommentsResponse, error)
 }
 
 type commentClient struct {
@@ -42,11 +43,21 @@ func (c *commentClient) OperateComment(ctx context.Context, in *CommentRequest, 
 	return out, nil
 }
 
+func (c *commentClient) ListComments(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (*ListCommentsResponse, error) {
+	out := new(ListCommentsResponse)
+	err := c.cc.Invoke(ctx, "/service.Comment/ListComments", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CommentServer is the server API for Comment service.
 // All implementations must embed UnimplementedCommentServer
 // for forward compatibility
 type CommentServer interface {
 	OperateComment(context.Context, *CommentRequest) (*CommentOperationResponse, error)
+	ListComments(context.Context, *ListRequest) (*ListCommentsResponse, error)
 	mustEmbedUnimplementedCommentServer()
 }
 
@@ -56,6 +67,9 @@ type UnimplementedCommentServer struct {
 
 func (UnimplementedCommentServer) OperateComment(context.Context, *CommentRequest) (*CommentOperationResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method OperateComment not implemented")
+}
+func (UnimplementedCommentServer) ListComments(context.Context, *ListRequest) (*ListCommentsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListComments not implemented")
 }
 func (UnimplementedCommentServer) mustEmbedUnimplementedCommentServer() {}
 
@@ -88,6 +102,24 @@ func _Comment_OperateComment_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Comment_ListComments_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CommentServer).ListComments(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/service.Comment/ListComments",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CommentServer).ListComments(ctx, req.(*ListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Comment_ServiceDesc is the grpc.ServiceDesc for Comment service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -98,6 +130,10 @@ var Comment_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "OperateComment",
 			Handler:    _Comment_OperateComment_Handler,
+		},
+		{
+			MethodName: "ListComments",
+			Handler:    _Comment_ListComments_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

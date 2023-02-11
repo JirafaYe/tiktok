@@ -13,12 +13,19 @@ import (
 func (m *Manager) RouteComment() {
 	group := m.handler.Group("/douyin/comment")
 	group.POST("/action", m.Action)
+	group.GET("/list", m.ListComments)
 }
 
 type CommentOperationResponse struct {
 	StatusCode int32       `json:"status_code"`
 	StatusMsg  string      `json:"status_msg"`
 	Comment    CommentBody `json:"comment"`
+}
+
+type ListCommentResponse struct {
+	StatusCode int32         `json:"status_code"`
+	StatusMsg  string        `json:"status_msg"`
+	Comment    []CommentBody `json:"comment_list"`
 }
 
 type CommentBody struct {
@@ -105,5 +112,57 @@ func (m *Manager) Action(ctx *gin.Context) {
 		StatusCode: resp.StatusCode,
 		StatusMsg:  resp.StatusMsg,
 		Comment:    body,
+	})
+}
+
+func (m *Manager) ListComments(ctx *gin.Context) {
+	videoId, _ := strconv.Atoi(ctx.Query("video_id"))
+
+	// center.Resolver() 参数为调用的服务名
+	// 该函数会进行自动负载均衡并返回一个*grpc.ClientConn
+	conn, err := center.Resolver("comment")
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"status_code": http.StatusInternalServerError,
+			"status_msg":  err.Error(),
+		})
+		return
+	}
+	defer conn.Close()
+
+	client := service.NewCommentClient(conn)
+
+	resp, err := client.ListComments(context.Background(), &service.ListRequest{VideoId: int32(videoId)})
+
+	if err != nil {
+		log.Println("获取评论列表失败", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"status_code": http.StatusInternalServerError,
+			"status_msg":  "获取评论列表失败",
+		})
+		return
+	}
+
+	list := make([]CommentBody, len(resp.CommentList))
+
+	for i, Comment := range resp.CommentList {
+		list[i] = CommentBody{
+			Id: Comment.Id,
+			User: User{
+				FollowCount:   Comment.User.FollowerCount,
+				FollowerCount: Comment.User.FollowCount,
+				ID:            Comment.User.Id,
+				IsFollow:      Comment.User.IsFollow,
+				Name:          Comment.User.Name,
+			},
+			Content:    Comment.Content,
+			CreateDate: Comment.CreateDate,
+		}
+	}
+
+	ctx.JSON(http.StatusOK, &ListCommentResponse{
+		StatusCode: resp.StatusCode,
+		StatusMsg:  resp.StatusMsg,
+		Comment:    list,
 	})
 }
