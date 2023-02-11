@@ -11,9 +11,9 @@ import (
 	"gorm.io/gorm"
 	"github.com/gofrs/uuid"
 	ffmpeg "github.com/u2takey/ffmpeg-go"
-	"github.com/Jirafa/publish/internel/store/obs"
-	"github.com/Jirafa/publish/internel/store/local"
-	"github.com/Jirafa/publish/pkg/jwt""
+	"github.com/JirafaYe/publish/internal/store/obs"
+	"github.com/JirafaYe/publish/internal/store/local"
+	"github.com/JirafaYe/publish/pkg/jwt""
 )
 
 type PublishSrv struct {
