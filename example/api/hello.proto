@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+option go_package = "./internal/app/service;service";
+
+package service;
+
+message HelloRequest {
+  string token = 1;
+}
+
+message HelloResponse {
+  int32 code = 1;
+  string msg = 2;
+  string data = 3;
+}
+
+service Hello {
+  rpc SayHello(HelloRequest) returns (HelloResponse) {}
+}
