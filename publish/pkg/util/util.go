@@ -6,15 +6,15 @@ import (
 	"fmt"
 )
 
-func NewString(s string) *string {
-	return &s
+func NewString(s string) string {
+	return s
 }
 
-func GetVideo(filePath string) ([]byte, error) {
+func GetVideo(filePath string) ([]byte) {
 	file, err := ioutil.ReadFile(filePath)
 	if err!= nil {
 		log.Printf("can't read video file by filePath: %v", err)
 	}
 	fmt.Printf("stream type: %T\n", file)
-	return file, nil
+	return file
 }

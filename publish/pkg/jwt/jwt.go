@@ -17,16 +17,16 @@ type CustomClaims struct {
 }
 
 // ParseToken parses the token.
+// TODO_hewen: 完善token
 func (j *JWT) ParseToken(tokenString string) (*CustomClaims, error) {
 	token, err := jwt.ParseWithClaims(
-		tokenString, 
-		&CustomClaims{}, 
+		tokenString, &CustomClaims{}, 
 		func(token *jwt.Token) (interface{}, error) {
-			return j.SigningKey, nil
-		}
-	)
+			return j.SigningKey, nil})
 	if err != nil {
 		log.Printf("Error parsing token: %v", err)
 		return nil, err
 	}
+	claims, _ := token.Claims.(*CustomClaims)
+	return claims, nil
 }

@@ -24,8 +24,8 @@ package main
 // }
 
 import (
-	"github.com/JirafaYe/publish/internel/server"
-	"github.com/JirafaYe/publish/internel/service"
+	"github.com/JirafaYe/publish/internal/server"
+	"github.com/JirafaYe/publish/internal/service"
 	"google.golang.org/grpc"
 	"log"
 	"net"
@@ -46,7 +46,9 @@ func main() {
 	}
 }
 
-
-// func RegisterPublishServer(s grpc.ServiceRegistrar, srv PublishServer) {
-// 	s.RegisterService(&Publish_ServiceDesc, srv)
+// type PublishServer interface {
+// 	PubAction(context.Context, *PublishActionRequest) (*PublishActionResponse, error)
+// 	PubList(context.Context, *PublishListRequest) (*PublishListResponse, error)
+// 	mustEmbedUnimplementedPublishServer()
 // }
+

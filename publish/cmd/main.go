@@ -21,17 +21,9 @@ var (
 
 func main() {
 	flag.Parse()
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
-	}
-	s := grpc.NewServer()
-	service.RegisterUserServer(s, &server.UserSrv{})
-	// 健康检查
-	grpc_health_v1.RegisterHealthServer(s, &server.HealthImpl{})
 
 	// 服务注册
-	err = center.Register(consul.AgentServiceRegistration{
+	err := center.Register(consul.AgentServiceRegistration{
 		ID:      "publish-1", // 服务节点的名称
 		Name:    "publish",   // 服务名称
 		Port:    *port,    // 服务端口
@@ -45,6 +37,15 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to register service: %v", err)
 	}
+
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *port))
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+	s := grpc.NewServer()
+	service.RegisterPublishServer(s, &server.PublishSrv{})
+	// 健康检查
+	grpc_health_v1.RegisterHealthServer(s, &server.HealthImpl{})
 
 	log.Printf("server listening at %v", lis.Addr())
 	if err := s.Serve(lis); err != nil {
