@@ -6,8 +6,8 @@ import (
 	"fmt"
 )
 
-func NewString(s string) string {
-	return s
+func NewString(s string) *string {
+	return &s
 }
 
 func GetVideo(filePath string) ([]byte) {

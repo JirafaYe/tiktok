@@ -14,6 +14,7 @@ message PublishActionRequest {
 
 message PublishActionResponse {
     int32 status_code = 1;
+    //optional string status_msg = 2;
     string status_msg = 2;
 }
 
@@ -26,8 +27,9 @@ message PublishListRequest {
 
 message PublishListResponse {
     int32 status_code = 1;
+    //optional string status_msg = 2;
     string status_msg = 2;
-    PubVideo video_list = 3;
+    repeated PubVideo video_list = 3;
 }
 
 message PubVideo {
@@ -44,6 +46,8 @@ message PubVideo {
 message PubUser {
     int64 id = 1;
     string name = 2;
+    // optional int64 follow_count = 3;
+    // optional int64 follower_count = 4;
     int64 follow_count = 3;
     int64 follower_count = 4;
     bool is_follow= 5;

@@ -1,8 +1,8 @@
 package server
 
 import (
+	// Action 
 	"context"
-	//"net/http"
 	"bytes"
 	"fmt"
 	"image/jpeg"
@@ -12,11 +12,14 @@ import (
 	"math/rand"
 	"time"
 	"strings"
-	//"gorm.io/gorm"
 	"github.com/gofrs/uuid"
 	ffmpeg "github.com/u2takey/ffmpeg-go"
 	"github.com/JirafaYe/publish/internal/service"
 	"github.com/JirafaYe/publish/internal/store/local"
+
+	// List
+	"github.com/JirafaYe/publish/internal/store/obs"
+	//"github.com/JirafaYe/publish/pkg/util"
 )
 
 //TODO: 解决token问题
@@ -117,13 +120,6 @@ func (c *PublishSrv) PubAction (ctx context.Context, request *service.PublishAct
 | update_date    | datetime    | NO   |     | CURRENT_TIMESTAMP | on update CURRENT_TIMESTAMP |
 +----------------+-------------+------+-----+-------------------+-----------------------------+
 */
-
-// func (c *PublishSrv) PublishList (ctx context.Context, request *service.DouyinPublishListRequest) (*service.DouyinPublishListResponse, error){
-// 	var response service.DouyinPublishListResponse
-
-// 	return &response, nil
-// }
-
 // 从视频流中截取封面
 // 测试完毕，可以从视频中截取封面（测试时函数做了修改，返回img image.Image）
 func readFrameAsJpeg(filePath string) ([]byte, error) {
@@ -146,3 +142,56 @@ func readFrameAsJpeg(filePath string) ([]byte, error) {
 
 	return buf.Bytes(), err
 }
+
+
+// TODO: publish list 函数
+func (c *PublishSrv) PubList (ctx context.Context, request *service.PublishListRequest) (*service.PublishListResponse, error){
+	tmpUserId := request.UserId
+	
+	var response service.PublishListResponse
+	response.StatusCode = 0
+	//response.StatusMsg = util.NewString("OK")
+	response.StatusCode = "OK"
+	// videos, err := m.localer.QueryVideosByUserId(tmpUserId)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+	videos := m.localer.QueryVideosByUserId(tmpUserId)
+	for _, v := range videos {
+		user := m.localer.QueryUserById(int64(v.UserId))
+		response.VideoList = append(response.VideoList, &service.PubVideo{
+			Id: v.UserId,
+			Author: &service.PubUser{
+				Id:            int64(user.ID),
+				Name:          user.Name,
+				FollowerCount: &user.FollowerCount,
+				FollowCount:   &user.FollowCount,
+				IsFollow:      true,
+			},
+			PlayUrl:       obs.GetVideoPrefix() + v.PlayURL,
+			CoverUrl:      obs.GetImagePrefix() + v.CoverURL,
+			CommentCount:  v.CommentCount,
+			FavoriteCount: v.FavoriteCount,
+			IsFavorite:    v.IsFavorite == 1,
+			Title:         v.Title,
+		})
+	}
+	return &response, nil
+}
+
+/*
+type PubVideo struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Id            int64    `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Author        *PubUser `protobuf:"bytes,2,opt,name=author,proto3" json:"author,omitempty"`
+	PlayUrl       string   `protobuf:"bytes,3,opt,name=play_url,json=playUrl,proto3" json:"play_url,omitempty"`
+	CoverUrl      string   `protobuf:"bytes,4,opt,name=cover_url,json=coverUrl,proto3" json:"cover_url,omitempty"`
+	FavoriteCount int64    `protobuf:"varint,5,opt,name=favorite_count,json=favoriteCount,proto3" json:"favorite_count,omitempty"`
+	CommentCount  int64    `protobuf:"varint,6,opt,name=comment_count,json=commentCount,proto3" json:"comment_count,omitempty"`
+	IsFavorite    bool     `protobuf:"varint,7,opt,name=is_favorite,json=isFavorite,proto3" json:"is_favorite,omitempty"`
+	Title         string   `protobuf:"bytes,8,opt,name=title,proto3" json:"title,omitempty"`
+}
+*/

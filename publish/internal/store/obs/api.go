@@ -41,4 +41,14 @@ func (m *Manager)GetFileURL(bucketName string, fileName string, expires time.Dur
 	return presignedURL, nil
 }
 
+// publish list
+
+func GetVideoPrefix() string {
+	return "http://" + C.Address + "/videos/"
+}
+
+func GetImagePrefix() string {
+	return "http://" + C.Address + "/images/"
+}
+
 

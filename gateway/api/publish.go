@@ -10,6 +10,8 @@ import (
 	"github.com/JirafaYe/gateway/center"
 	"github.com/JirafaYe/gateway/service"
 	"github.com/gin-gonic/gin"
+
+	"strconv"
 )
 
 // type ActionMsg struct {
@@ -19,6 +21,7 @@ import (
 // 	Data []byte	 `json:"file"`
 // }
 
+// TODO: 这个结构体其实可以不要的
 type ActionResponse struct {
 	StatusCode int64   `json:"status_code"`
 	StatusMsg  *string `json:"status_msg"` 
@@ -31,7 +34,7 @@ func (m *Manager) RoutePublish() {
 	// group.POST("/action", m.publishAction)
 	// group.Get("/list", m.publishList)
 	m.handler.POST("/douyin/publish/action", m.publishAction)
-	//m.handler.GET("/douyin/publish/list", m.publishList)
+	m.handler.GET("/douyin/publish/list", m.publishList)
 }
 
 //TODO_hewen 修改并完善publishAction
@@ -89,37 +92,91 @@ func (m *Manager) publishAction(ctx *gin.Context) {
 	})
 }
 
-
-// response JSON
-// {
-//     "status_code": 0,
-//     "status_msg": "string"
+// type ListResponse struct {
+// 	StatusCode int64   `json:"status_code"`// 状态码，0-成功，其他值-失败
+// 	StatusMsg  *string `json:"status_msg"` // 返回状态描述
+// 	VideoList  []Video `json:"video_list"` // 用户发布的视频列表
 // }
+type ListResponse struct {
+	StatusCode int64   `json:"status_code"`// 状态码，0-成功，其他值-失败
+	StatusMsg  string `json:"status_msg"` // 返回状态描述
+	VideoList  []*PubVideo `json:"video_list"` // 用户发布的视频列表
+}
+
+// Video
+type PubVideo struct {
+	Author        PubUser   `json:"author"`        // 视频作者信息
+	CommentCount  int64  `json:"comment_count"` // 视频的评论总数
+	CoverURL      string `json:"cover_url"`     // 视频封面地址
+	FavoriteCount int64  `json:"favorite_count"`// 视频的点赞总数
+	ID            int64  `json:"id"`            // 视频唯一标识
+	IsFavorite    bool   `json:"is_favorite"`   // true-已点赞，false-未点赞
+	PlayURL       string `json:"play_url"`      // 视频播放地址
+	Title         string `json:"title"`         // 视频标题
+}
+
+// 视频作者信息
+//
+// User
+type PubUser struct {
+	FollowCount   int64  `json:"follow_count"`  // 关注总数
+	FollowerCount int64  `json:"follower_count"`// 粉丝总数
+	ID            int64  `json:"id"`            // 用户id
+	IsFollow      bool   `json:"is_follow"`     // true-已关注，false-未关注
+	Name          string `json:"name"`          // 用户名称
+}
 
 //TODO_hewen 修改并完善publishList
-// func (m *Manager) publishList(ctx *gin.Context) {
-// 	var msg registerMsg
-// 	// 获取请求中的json数据
-// 	if err := ctx.ShouldBindJSON(&msg); err != nil {
-// 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-// 		return
-// 	}
-// 	// center.Resolver() 参数为调用的服务名
-// 	// 该函数会进行自动负载均衡并返回一个*grpc.ClientConn
-// 	conn, err := center.Resolver("publish")
-// 	if err != nil {
-// 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-// 		return
-// 	}
-// 	defer conn.Close()
-// 	c := service.NewUserClient(conn)
+func (m *Manager) publishList(ctx *gin.Context) {
+	// ctx 会检索URL
+	// TODO: PostForm还是query?
+    token := ctx.PostForm("token")
+    tmpUserID := ctx.PostForm("user_id")
+	userID, err := strconv.ParseInt(tmpUserID, 10, 64)
+	if err != nil {
+		ctx.JSON(1, gin.H{"msg": "上传的id错误", "data": nil})
+	}
+	// center.Resolver() 参数为调用的服务名
+	// 该函数会进行自动负载均衡并返回一个*grpc.ClientConn
+	conn, err := center.Resolver("publish")
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	defer conn.Close() 
 
-// 	response, _ := c.List(context.Background(), &service.RegisterRequest{
-// 		Username: msg.Username,
-// 		Password: msg.Password,
-// 	})
+	client := service.NewPublishClient(conn)
+	rpcResponse, err := client.PubList(context.Background(), &service.PublishListRequest{
+		Token:  token,
+		UserId: userID,
+	})
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error":err.Error()})
+	}
 
-// 	ctx.JSON(int(response.Code), gin.H{"msg": response.Msg, "data": map[string]any{
-// 		"user_id": response.UserId,
-// 	}})
-// }
+	response := ListResponse{
+		StatusCode: int64(rpcResponse.StatusCode),
+		StatusMsg:  rpcResponse.StatusMsg,
+	}
+	response.VideoList = make([]*PubVideo, len(rpcResponse.VideoList))
+	for i, v := range rpcResponse.VideoList {
+		response.VideoList[i] = &PubVideo{
+			ID: v.Id,
+			Author: PubUser{
+				ID:            v.Author.Id,
+				Name:          v.Author.Name,
+				FollowCount:   v.Author.FollowCount,
+				FollowerCount: v.Author.FollowerCount,
+				IsFollow:      v.Author.IsFollow,
+			},
+			PlayURL:       v.PlayUrl,
+			CoverURL:      v.CoverUrl,
+			FavoriteCount: v.FavoriteCount,
+			CommentCount:  v.CommentCount,
+			IsFavorite:    v.IsFavorite,
+			Title:         v.Title,
+		}
+	}
+
+	ctx.JSON(int(response.StatusCode), response)
+}

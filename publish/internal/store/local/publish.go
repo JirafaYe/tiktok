@@ -3,21 +3,41 @@ package local
 import (
 	//"context"
 	"gorm.io/gorm"
+	"time"
 )
 
 // DB == m.handler
 
+// type Video struct {
+// 	gorm.Model
+// 	UserId        int64  `gorm:"column:user_id; type:bigint"`
+// 	PlayURL       string `gorm:"column:play_url; type:varchar(200)"`
+// 	CoverURL      string `gorm:"column:cover_url; type:varchar(200)"`
+// 	Title         string `gorm:"column:title; type:varchar(200)"`
+// }
+
+// type User struct {
+// 	gorm.Model
+// 	UserId		  int64  `gorm:"column:user_id; type:bigint"`
+// }
+
 type Video struct {
 	gorm.Model
-	UserId        int64  `gorm:"column:user_id; type:bigint"`
 	PlayURL       string `gorm:"column:play_url; type:varchar(200)"`
 	CoverURL      string `gorm:"column:cover_url; type:varchar(200)"`
 	Title         string `gorm:"column:title; type:varchar(200)"`
+	FavoriteCount int64  `gorm:"column:favorite_count; type:bigint"`
+	CommentCount  int64  `gorm:"column:comment_count; type:bigint"`
+	IsFavorite    int16  `gorm:"column:is_favorite; type:tinyint"`
+	UserId        int64  `gorm:"column:user_id; type:bigint"`
 }
 
 type User struct {
 	gorm.Model
 	UserId		  int64  `gorm:"column:user_id; type:bigint"`
+	Name          string `gorm:"column:name; type:varchar(200)"`
+	FollowerCount int64  `gorm:"column:follower_count; type:bigint"`
+	FollowCount   int64  `gorm:"column:follow_count; type:bigint"`
 }
 
 func (v Video) TableName() string {
@@ -61,12 +81,34 @@ func (m *Manager) CreateVideo(video *Video) error {
 +----------------+-------------+------+-----+-------------------+-----------------------------+
 */
 
-// // PublishList 返回一系列视频，带有authorID
-// func (m *Manager) PublishList(ctx context.Context, authorId int64) ([]*Video, error) {
-// 	var pubList []*Video
-// 	err := m.handler.WithContext(ctx).Model(&Video{}).Where(&Video{AuthorID: int(authorId)}).Find(&pubList).Error
+// func (m *Manager) QueryVideosByUserId(userId int64) ([]*Video, error) {
+// 	var videos []*Video
+// 	db := m.handler.Table("t_video")
+// 	err := db.Where("user_id = ?", userId).Order("created_date desc").Find(&videos).Error
 // 	if err != nil {
 // 		return nil, err
 // 	}
-// 	return pubList, nil
+// 	return videos, nil
 // }
+
+// TODO: 验证正确性
+func (m *Manager) QueryVideosByUserId(userId int64) (videos []*Video) {
+	db := m.handler.Table("t_video")
+	db.Where("user_id = ?", userId).Order("created_date desc").Find(&videos)
+	return
+}
+
+// func (m *Manager) QueryNameById(id int64) (name string) {
+// 	db := m.handler.Table("t_user")
+// 	var user User
+// 	db.Where("user_id = ?", id).Find(&user)
+// 	name = user.Name
+// 	return
+// }
+
+// TODO 修改
+func (m *Manager) QueryUserById(id int64) (user User) {
+	db := m.handler.Table("t_user")
+	db.Where("user_id = ?", id).Find(&user)
+	return
+}
