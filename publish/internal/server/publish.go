@@ -40,7 +40,7 @@ func (c *PublishSrv) PubAction (ctx context.Context, request *service.PublishAct
 	MinioVideoBucketName := "videos"
 	MinioCoverBucketName := "images"
 	// 获取视频
-	videoData := []byte(request.Data1)
+	videoData := []byte(request.Data)
 	reader := bytes.NewReader(videoData)// []byte -> reader
 	u2, err := uuid.NewV4()// 返回随机的uuid
 	if err != nil {
