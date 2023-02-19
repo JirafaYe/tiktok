@@ -12,7 +12,7 @@ type Video struct {
 	Title         string `gorm:"column:title; type:varchar(200)"`
 	FavoriteCount int64  `gorm:"column:favorite_count; type:bigint"`
 	CommentCount  int64  `gorm:"column:comment_count; type:bigint"`
-	IsFavorite    int16  `gorm:"column:is_favorite; type:tinyint"`
+	IsFavorite    bool   `gorm:"column:is_favorite; type:tinyint"`
 	UserId        int64  `gorm:"column:user_id; type:bigint"`
 }
 

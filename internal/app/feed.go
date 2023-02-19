@@ -41,7 +41,7 @@ func (f *FeedServer) FeedVideo(ctx context.Context, request *service.TiktokFeedR
 			CoverUrl:      obs.GetImagePrefix() + v.CoverURL,
 			CommentCount:  v.CommentCount,
 			FavoriteCount: v.FavoriteCount,
-			IsFavorite:    v.IsFavorite == 1,
+			IsFavorite:    v.IsFavorite,
 			Title:         v.Title,
 		})
 	}
