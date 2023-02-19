@@ -3,7 +3,7 @@ package local
 import (
 	//"context"
 	"gorm.io/gorm"
-	"time"
+	//"time"
 )
 
 // DB == m.handler
@@ -109,6 +109,6 @@ func (m *Manager) QueryVideosByUserId(userId int64) (videos []*Video) {
 // TODO 修改
 func (m *Manager) QueryUserById(id int64) (user User) {
 	db := m.handler.Table("t_user")
-	db.Where("user_id = ?", id).Find(&user)
+	db.Where("id = ?", id).Find(&user)
 	return
 }
