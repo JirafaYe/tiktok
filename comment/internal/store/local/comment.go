@@ -54,12 +54,13 @@ func (m *Manager) DeleteComment(comment Comment) error {
 // videoId合法性校验
 func (m *Manager) SelectVideoById(id int32) (bool, error) {
 	var video Video
-	err := m.handler.Where("id=?", id).Select("id").Find(&video).Error
+	tx := m.handler.Where("id=?", id).Select("id").Find(&video)
+	err := tx.Error
 
 	if err != nil {
 		return false, err
 	}
-	if 0 != video.ID {
+	if 0 != tx.RowsAffected {
 		return true, nil
 	} else {
 		return false, nil
