@@ -15,7 +15,7 @@ import (
 func (m *Manager)UploadFile(bucketName string, objectName string, reader io.Reader, objectsize int64) error {
 	ctx := context.Background()
 	n, err := m.handler.PutObject(ctx, bucketName, objectName, reader, objectsize, minio.PutObjectOptions{
-		ContentType: "application/octet-stream",
+		ContentType: "video/mp4",
 	})
 	if err != nil {
 		log.Printf("upload %s of size %d failed, %s", bucketName, objectsize, err)

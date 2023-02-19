@@ -53,12 +53,16 @@ func (c *PublishSrv) PubAction (ctx context.Context, request *service.PublishAct
 
 	// 上传视频
 	err = m.objectStorer.UploadFile(MinioVideoBucketName, fileName, reader, int64(len(videoData)))
-	// 获取视频链接
-	url, err := m.objectStorer.GetFileURL(MinioVideoBucketName, fileName, 0)
-	playURL := strings.Split(url.String(), "?")[0]
 	if err != nil {
 		return nil, err
 	}
+	// 获取视频链接
+	// url, err := m.objectStorer.GetFileURL(MinioVideoBucketName, fileName, 0)
+	// playURL := strings.Split(url.String(), "?")[0]
+	// if err != nil {
+	// 	return nil, err
+	// }
+	playURL := fileName
 
 	// 获取封面
 	u3, err := uuid.NewV4()
@@ -78,11 +82,12 @@ func (c *PublishSrv) PubAction (ctx context.Context, request *service.PublishAct
 		return nil, err
 	}
 	// 获取封面链接
-	coverURL, err := m.objectStorer.GetFileURL(MinioCoverBucketName, coverPath, 0)
-	if err != nil {
-		return nil, err
-	}
-	CoverURL := strings.Split(coverURL.String(), "?")[0]
+	// coverURL, err := m.objectStorer.GetFileURL(MinioCoverBucketName, coverPath, 0)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// CoverURL := strings.Split(coverURL.String(), "?")[0]
+	CoverURL := coverPath
 
 	// 封装video: user_id, play_url, cover_url, title
 	// TODO: 从token中提取user_id
