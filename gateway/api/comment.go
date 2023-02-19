@@ -12,8 +12,8 @@ import (
 
 func (m *Manager) RouteComment() {
 	group := m.handler.Group("/douyin/comment")
-	group.POST("/action", m.Action)
-	group.GET("/list", m.ListComments)
+	group.POST("/action/", m.Action)
+	group.GET("/list/", m.ListComments)
 }
 
 type CommentOperationResponse struct {

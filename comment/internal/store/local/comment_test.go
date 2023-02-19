@@ -14,9 +14,8 @@ func TestInsert(t *testing.T) {
 	}
 	c := Comment{
 		AuthorId: 1,
-		VideoId:  1,
+		VideoId:  1234,
 		Msg:      "hello test",
-		IsTopped: false,
 	}
 
 	err = manager.InsertComment(&c)
@@ -35,6 +34,19 @@ func TestInsert(t *testing.T) {
 
 }
 
+func TestUpdate(t *testing.T) {
+	manager, err := New()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = manager.UpdateCommentsCountByVideoId(1)
+
+	if err != nil {
+		log.Println(err)
+	}
+
+}
 func TestSelect(t *testing.T) {
 	manager, _ := New()
 	i, err := manager.SelectCommentNumsByVideoId(1000)
