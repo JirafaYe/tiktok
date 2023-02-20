@@ -2,9 +2,11 @@ package server
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/JirafaYe/comment/internal/service"
 	"github.com/JirafaYe/comment/internal/store/local"
+	"github.com/JirafaYe/comment/pkg"
 	"log"
 )
 
@@ -13,10 +15,19 @@ type CommentServer struct {
 }
 
 func (c *CommentServer) ListComments(ctx context.Context, req *service.ListRequest) (*service.ListCommentsResponse, error) {
+	resp, paresErr := pkg.ParseToken(req.Token)
+	if paresErr != nil {
+		log.Println("解析token失败", paresErr)
+		return nil, errors.New("解析token失败")
+	} else if !m.cacher.IsUserTokenExist(resp.Username) {
+		log.Println("用户token不存在")
+		return nil, errors.New("token登录验证失败")
+	}
+
 	//测试user
 	user := &service.CommentUser{
-		Id:   1,
-		Name: "user",
+		Id:   resp.Id,
+		Name: resp.Username,
 	}
 
 	commentList, err := m.localer.SelectCommentListByVideoId(req.VideoId)
@@ -41,10 +52,18 @@ func (c *CommentServer) ListComments(ctx context.Context, req *service.ListReque
 func (c *CommentServer) OperateComment(ctx context.Context, req *service.CommentRequest) (*service.CommentOperationResponse, error) {
 	comment := ConvertCommentRequest(req)
 
-	//测试user
+	resp, paresErr := pkg.ParseToken(req.Token)
+	if paresErr != nil {
+		log.Println("解析token失败", paresErr)
+		return nil, errors.New("解析token失败")
+	} else if !m.cacher.IsUserTokenExist(resp.Username) {
+		log.Println("用户token不存在")
+		return nil, errors.New("token登录验证失败")
+	}
+
 	user := &service.CommentUser{
-		Id:   1,
-		Name: "user",
+		Id:   resp.Id,
+		Name: resp.Username,
 	}
 
 	var err error
@@ -52,12 +71,16 @@ func (c *CommentServer) OperateComment(ctx context.Context, req *service.Comment
 		err = m.localer.InsertComment(&comment)
 		if err != nil {
 			log.Print("插入评论失败", err)
+			return nil, errors.New("插入评论失败")
 		}
+		m.localer.UpdateCommentsCountByVideoId(comment.VideoId, 1)
 	} else if req.ActionType == 2 {
 		err = m.localer.DeleteComment(comment)
 		if err != nil {
-			log.Print("删除评论失败", err)
+			log.Print("删除评论失败: ", err)
+			return nil, errors.New("删除评论失败")
 		}
+		m.localer.UpdateCommentsCountByVideoId(comment.VideoId, -1)
 	}
 
 	return &service.CommentOperationResponse{

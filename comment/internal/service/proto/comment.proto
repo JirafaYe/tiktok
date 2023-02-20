@@ -10,10 +10,12 @@ message CommentRequest{
   int32 comment_id=3;
   int32 video_id=4;
   string msg=5;
+  string token=6;
 }
 
 message ListRequest{
   int32 video_id=1;
+  string token=2;
 }
 
 message CommentOperationResponse{

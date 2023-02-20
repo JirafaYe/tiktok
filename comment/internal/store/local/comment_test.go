@@ -40,7 +40,7 @@ func TestUpdate(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	err = manager.UpdateCommentsCountByVideoId(1)
+	err = manager.UpdateCommentsCountByVideoId(16, 1)
 
 	if err != nil {
 		log.Println(err)

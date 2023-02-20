@@ -39,8 +39,11 @@ func (m *Manager) Action(ctx *gin.Context) {
 	log.Printf("请求评论操作")
 	videoId, _ := strconv.Atoi(ctx.Query("video_id"))
 	actionType, _ := strconv.Atoi(ctx.Query("action_type"))
+	token := ctx.Query("token")
+
 	var msg string
 	var commentId int
+
 	if actionType == 1 {
 		msg = ctx.Query("comment_text")
 		if msg == "" {
@@ -68,6 +71,30 @@ func (m *Manager) Action(ctx *gin.Context) {
 		return
 	}
 
+	//// center.Resolver() 参数为调用的服务名
+	//// 该函数会进行自动负载均衡并返回一个*grpc.ClientConn
+	//connUser, err := center.Resolver("user")
+	//if err != nil {
+	//	ctx.JSON(http.StatusInternalServerError, gin.H{
+	//		"status_code": http.StatusInternalServerError,
+	//		"status_msg":  err.Error(),
+	//	})
+	//	return
+	//}
+	//defer connUser.Close()
+	//clientUser := service.NewUserProtoClient(connUser)
+	//
+	//userResp, err := clientUser.GetUserMsg(context.Background(), &service.UserRequest{Token: token})
+	//if err != nil {
+	//	ctx.JSON(http.StatusInternalServerError, gin.H{
+	//		"status_code": http.StatusInternalServerError,
+	//		"status_msg":  err.Error(),
+	//	})
+	//	return
+	//}
+	//
+	//log.Println(userResp)
+
 	// center.Resolver() 参数为调用的服务名
 	// 该函数会进行自动负载均衡并返回一个*grpc.ClientConn
 	conn, err := center.Resolver("comment")
@@ -87,6 +114,7 @@ func (m *Manager) Action(ctx *gin.Context) {
 		ActionType: int32(actionType),
 		CommentId:  int32(commentId),
 		Msg:        msg,
+		Token:      token,
 	})
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
