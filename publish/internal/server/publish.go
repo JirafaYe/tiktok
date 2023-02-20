@@ -9,8 +9,8 @@ import (
 	"image"
 	"os"
 	"log"
-	"math/rand"
-	"time"
+	// "math/rand"
+	// "time"
 	"strings"
 	"github.com/gofrs/uuid"
 	ffmpeg "github.com/u2takey/ffmpeg-go"
@@ -19,26 +19,23 @@ import (
 
 	// List
 	"github.com/JirafaYe/publish/internal/store/obs"
-	//"github.com/JirafaYe/publish/pkg/util"
+	jwt"github.com/JirafaYe/publish/pkg/jwt"
 )
-
-//TODO: 解决token问题
-	// 解析token，得到user_id
-	// claim, err := jwt.ParseToken(request.Token)
-	// if err!= nil {
-	// 	log.Printf("failed to parse token: %v", err)
-    //     return nil, err
-    // }
-	// uid := int(claim.Id)
 
 type PublishSrv struct {
 	service.UnimplementedPublishServer
 }
 
 func (c *PublishSrv) PubAction (ctx context.Context, request *service.PublishActionRequest) (*service.PublishActionResponse, error){
+	// 解析token得到user_id
+	claims, err := jwt.ParseToken(request.Token)
+	if err != nil {
+        fmt.Printf("failed to parse token: %v", err)
+    }
+	uid := claims.Id
 	// 暂时模拟uid
-	rand.Seed(time.Now().UnixNano())
-	uid := rand.Intn(10)+1
+	// rand.Seed(time.Now().UnixNano())
+	// uid := rand.Intn(10)+1
 	//暂时写死
 	MinioVideoBucketName := "videos"
 	MinioCoverBucketName := "images"
@@ -90,7 +87,6 @@ func (c *PublishSrv) PubAction (ctx context.Context, request *service.PublishAct
 	CoverURL_database := coverPath
 
 	// 封装video: user_id, play_url, cover_url, title
-	// TODO: 从token中提取user_id
 	videoModel := &local.Video{
 		PlayURL:  		playURL_database,
 		CoverURL: 		CoverURL_database,
