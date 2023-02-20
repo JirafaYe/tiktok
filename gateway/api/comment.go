@@ -71,30 +71,6 @@ func (m *Manager) Action(ctx *gin.Context) {
 		return
 	}
 
-	//// center.Resolver() 参数为调用的服务名
-	//// 该函数会进行自动负载均衡并返回一个*grpc.ClientConn
-	//connUser, err := center.Resolver("user")
-	//if err != nil {
-	//	ctx.JSON(http.StatusInternalServerError, gin.H{
-	//		"status_code": http.StatusInternalServerError,
-	//		"status_msg":  err.Error(),
-	//	})
-	//	return
-	//}
-	//defer connUser.Close()
-	//clientUser := service.NewUserProtoClient(connUser)
-	//
-	//userResp, err := clientUser.GetUserMsg(context.Background(), &service.UserRequest{Token: token})
-	//if err != nil {
-	//	ctx.JSON(http.StatusInternalServerError, gin.H{
-	//		"status_code": http.StatusInternalServerError,
-	//		"status_msg":  err.Error(),
-	//	})
-	//	return
-	//}
-	//
-	//log.Println(userResp)
-
 	// center.Resolver() 参数为调用的服务名
 	// 该函数会进行自动负载均衡并返回一个*grpc.ClientConn
 	conn, err := center.Resolver("comment")
@@ -145,6 +121,7 @@ func (m *Manager) Action(ctx *gin.Context) {
 
 func (m *Manager) ListComments(ctx *gin.Context) {
 	videoId, _ := strconv.Atoi(ctx.Query("video_id"))
+	token := ctx.Query("token")
 
 	// center.Resolver() 参数为调用的服务名
 	// 该函数会进行自动负载均衡并返回一个*grpc.ClientConn
@@ -160,7 +137,7 @@ func (m *Manager) ListComments(ctx *gin.Context) {
 
 	client := service.NewCommentClient(conn)
 
-	resp, err := client.ListComments(context.Background(), &service.ListRequest{VideoId: int32(videoId)})
+	resp, err := client.ListComments(context.Background(), &service.ListRequest{VideoId: int32(videoId), Token: token})
 
 	if err != nil {
 		log.Println("获取评论列表失败", err)
@@ -174,6 +151,10 @@ func (m *Manager) ListComments(ctx *gin.Context) {
 	list := make([]CommentBody, len(resp.CommentList))
 
 	for i, Comment := range resp.CommentList {
+		if Comment.User == nil {
+			log.Println("User获取错误 commentId: ", Comment.Id)
+			Comment.User = &service.CommentUser{}
+		}
 		list[i] = CommentBody{
 			Id: Comment.Id,
 			User: User{

@@ -24,22 +24,39 @@ func (c *CommentServer) ListComments(ctx context.Context, req *service.ListReque
 		return nil, errors.New("token登录验证失败")
 	}
 
-	//测试user
-	user := &service.CommentUser{
-		Id:   resp.Id,
-		Name: resp.Username,
-	}
-
 	commentList, err := m.localer.SelectCommentListByVideoId(req.VideoId)
 	if err != nil {
 		log.Println("获取评论列表失败", err)
-		return nil, err
+		return nil, errors.New("获取评论列表失败")
 	}
 
+	var ids []int64
 	list := make([]*service.CommentBody, len(commentList))
+	userMap := make(map[int64]*service.CommentUser)
+	id := make(map[int64]interface{})
+
+	for _, comment := range commentList {
+		id[comment.AuthorId] = nil
+	}
+
+	for k, _ := range id {
+		ids = append(ids, k)
+	}
+
+	msg, err := m.localer.GetUserMsg(ids)
+	if err != nil {
+		log.Println("获取用户信息失败")
+		return nil, errors.New("获取用户信息失败")
+	}
+
+	for _, user := range msg {
+		log.Println(user)
+		userMap[user.Id] = &user
+	}
 
 	for i, comment := range commentList {
-		list[i] = ConvertCommentBody(comment, user)
+		log.Println(userMap[comment.AuthorId], comment.AuthorId)
+		list[i] = ConvertCommentBody(comment, userMap[comment.AuthorId])
 	}
 
 	return &service.ListCommentsResponse{
@@ -73,14 +90,14 @@ func (c *CommentServer) OperateComment(ctx context.Context, req *service.Comment
 			log.Print("插入评论失败", err)
 			return nil, errors.New("插入评论失败")
 		}
-		m.localer.UpdateCommentsCountByVideoId(comment.VideoId, 1)
+		go m.localer.UpdateCommentsCountByVideoId(comment.VideoId, 1)
 	} else if req.ActionType == 2 {
 		err = m.localer.DeleteComment(comment)
 		if err != nil {
 			log.Print("删除评论失败: ", err)
 			return nil, errors.New("删除评论失败")
 		}
-		m.localer.UpdateCommentsCountByVideoId(comment.VideoId, -1)
+		go m.localer.UpdateCommentsCountByVideoId(comment.VideoId, -1)
 	}
 
 	return &service.CommentOperationResponse{

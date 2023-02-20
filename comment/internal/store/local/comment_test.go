@@ -66,3 +66,11 @@ func TestList(t *testing.T) {
 		fmt.Println(v)
 	}
 }
+
+func TestGetMsg(t *testing.T) {
+	manager, _ := New()
+	msg, _ := manager.GetUserMsg([]int64{1, 2})
+	for _, v := range msg {
+		log.Printf("%#v", v)
+	}
+}

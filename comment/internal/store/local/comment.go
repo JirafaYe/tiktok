@@ -2,6 +2,7 @@ package local
 
 import (
 	"errors"
+	"github.com/JirafaYe/comment/internal/service"
 	"gorm.io/gorm"
 	"time"
 )
@@ -20,7 +21,7 @@ type Video struct {
 
 type Comment struct {
 	Id        int32          `json:"id"`
-	AuthorId  int32          `json:"author_id"`
+	AuthorId  int64          `json:"author_id"`
 	VideoId   int32          `json:"video_id"`
 	Msg       string         `json:"msg"`
 	CreatedAt time.Time      `json:"created_at"`
@@ -31,7 +32,7 @@ type Comment struct {
 // User结构体
 type User struct {
 	gorm.Model
-	Name          string `gorm:"column:name; type:varchar(200)"`
+	Name          string `gorm:"column:username; type:varchar(200)"`
 	FollowerCount int64  `gorm:"column:follower_count; type:bigint"`
 	FollowCount   int64  `gorm:"column:follow_count; type:bigint"`
 }
@@ -48,10 +49,10 @@ func (u User) TableName() string {
 	return "t_user"
 }
 
-func (m *Manager) GetUserMsg(id int32) (User, error) {
-	var user User
-	tx := m.handler.Select("id,name,follower_count,follow_count").Where("id=?", id).Find(&user)
-	return user, tx.Error
+func (m *Manager) GetUserMsg(id []int64) ([]service.CommentUser, error) {
+	var users []service.CommentUser
+	tx := m.handler.Model(&User{}).Select("id,username name").Where(id).Find(&users)
+	return users, tx.Error
 }
 
 func (m *Manager) InsertComment(comment *Comment) error {
@@ -103,14 +104,6 @@ func (m *Manager) SelectCommentListByVideoId(id int32) ([]Comment, error) {
 
 // 更新评论数
 func (m *Manager) UpdateCommentsCountByVideoId(id int32, num int32) error {
-	//var cnt int64
-	//tx := m.handler.Model(&Comment{}).Where("video_id=?", id).Count(&cnt)
-	//err := tx.Error
-	//if err != nil {
-	//	return err
-	//} else if tx.RowsAffected == 0 {
-	//	return errors.New("未查询到评论记录")
-	//}
 	return m.handler.Model(&Video{}).Where("id = ?", id).
 		UpdateColumn("comment_count", gorm.Expr("comment_count + ?", num)).Error
 }

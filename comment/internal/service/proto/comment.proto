@@ -5,7 +5,7 @@ option go_package = "../";
 package service;
 
 message CommentRequest{
-  int32 author_id=1;
+  int64 author_id=1;
   int32 action_type=2;
   int32 comment_id=3;
   int32 video_id=4;
