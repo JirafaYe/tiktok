@@ -56,13 +56,13 @@ func (m *Manager) GetUserMsg(id []int64) ([]service.CommentUser, error) {
 }
 
 func (m *Manager) InsertComment(comment *Comment) error {
-	isExisted, err := m.SelectVideoById(comment.VideoId)
-	if err != nil {
-		return err
-	}
-	if !isExisted {
-		return errors.New("video_id不存在")
-	}
+	//isExisted, err := m.SelectVideoById(comment.VideoId)
+	//if err != nil {
+	//	return err
+	//}
+	//if !isExisted {
+	//	return errors.New("video_id不存在")
+	//}
 	return m.handler.Create(comment).Error
 }
 
