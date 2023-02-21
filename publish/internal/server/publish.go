@@ -9,8 +9,8 @@ import (
 	"image"
 	"os"
 	"log"
-	"math/rand"
-	"time"
+	// "math/rand"
+	// "time"
 	"strings"
 	"github.com/gofrs/uuid"
 	ffmpeg "github.com/u2takey/ffmpeg-go"
@@ -19,26 +19,24 @@ import (
 
 	// List
 	"github.com/JirafaYe/publish/internal/store/obs"
-	//"github.com/JirafaYe/publish/pkg/util"
+	jwt"github.com/JirafaYe/publish/pkg/jwt"
 )
-
-//TODO: 解决token问题
-	// 解析token，得到user_id
-	// claim, err := jwt.ParseToken(request.Token)
-	// if err!= nil {
-	// 	log.Printf("failed to parse token: %v", err)
-    //     return nil, err
-    // }
-	// uid := int(claim.Id)
 
 type PublishSrv struct {
 	service.UnimplementedPublishServer
 }
 
 func (c *PublishSrv) PubAction (ctx context.Context, request *service.PublishActionRequest) (*service.PublishActionResponse, error){
+	// 解析token得到user_id
+	claims, err := jwt.ParseToken(request.Token)
+	if err != nil {
+        fmt.Printf("failed to parse token: %v", err)
+    }
+	uid := claims.Id
+	fmt.Printf("uid: %v\n", uid)
 	// 暂时模拟uid
-	rand.Seed(time.Now().UnixNano())
-	uid := rand.Intn(10)+1
+	// rand.Seed(time.Now().UnixNano())
+	// uid := rand.Intn(10)+1
 	//暂时写死
 	MinioVideoBucketName := "videos"
 	MinioCoverBucketName := "images"
@@ -57,12 +55,12 @@ func (c *PublishSrv) PubAction (ctx context.Context, request *service.PublishAct
 		return nil, err
 	}
 	// 获取视频链接
-	// url, err := m.objectStorer.GetFileURL(MinioVideoBucketName, fileName, 0)
-	// playURL := strings.Split(url.String(), "?")[0]
-	// if err != nil {
-	// 	return nil, err
-	// }
-	playURL := fileName
+	url, err := m.objectStorer.GetFileURL(MinioVideoBucketName, fileName, 0)
+	playURL := strings.Split(url.String(), "?")[0]
+	if err != nil {
+		return nil, err
+	}
+	playURL_database := fileName// 存进数据库的，较为简洁
 
 	// 获取封面
 	u3, err := uuid.NewV4()
@@ -87,15 +85,14 @@ func (c *PublishSrv) PubAction (ctx context.Context, request *service.PublishAct
 	// 	return nil, err
 	// }
 	// CoverURL := strings.Split(coverURL.String(), "?")[0]
-	CoverURL := coverPath
+	CoverURL_database := coverPath
 
 	// 封装video: user_id, play_url, cover_url, title
-	// TODO: 从token中提取user_id
 	videoModel := &local.Video{
-		PlayURL:  playURL,
-		CoverURL: CoverURL,
-		Title: 	  request.Title,
-		UserId:   int64(uid),
+		PlayURL:  		playURL_database,
+		CoverURL: 		CoverURL_database,
+		Title: 	  		request.Title,
+		UserId:   		int64(uid),
 	}
 	// 数据库中插入视频
 	err = m.localer.CreateVideo(videoModel)
@@ -111,19 +108,21 @@ func (c *PublishSrv) PubAction (ctx context.Context, request *service.PublishAct
 }
 
 /* t_video 表
-+----------------+-------------+------+-----+-------------------+-----------------------------+
-| Field          | Type        | Null | Key | Default           | Extra                       |
-+----------------+-------------+------+-----+-------------------+-----------------------------+
-| video_id       | bigint(20)  | NO   | PRI | NULL              | auto_increment              |
-| user_id        | bigint(20)  | YES  |     | NULL              |                             |
-| play_url       | varchar(60) | YES  |     |                   |                             |
-| cover_url      | varchar(60) | YES  |     |                   |                             |
-| favorite_count | int(11)     | YES  |     | 0                 |                             |
-| comment_count  | int(11)     | YES  |     | 0                 |                             |
-| title          | text        | YES  |     | NULL              |                             |
-| create_date    | datetime    | NO   |     | CURRENT_TIMESTAMP |                             |
-| update_date    | datetime    | NO   |     | CURRENT_TIMESTAMP | on update CURRENT_TIMESTAMP |
-+----------------+-------------+------+-----+-------------------+-----------------------------+
++----------------+---------------------+------+-----+---------+----------------+
+| Field          | Type                | Null | Key | Default | Extra          |
++----------------+---------------------+------+-----+---------+----------------+
+| id             | bigint(20) unsigned | NO   | PRI | NULL    | auto_increment |
+| created_at     | datetime(3)         | YES  |     | NULL    |                |
+| updated_at     | datetime(3)         | YES  |     | NULL    |                |
+| deleted_at     | datetime(3)         | YES  | MUL | NULL    |                |
+| play_url       | varchar(200)        | YES  |     | NULL    |                |
+| cover_url      | varchar(200)        | YES  |     | NULL    |                |
+| title          | varchar(200)        | YES  |     | NULL    |                |
+| favorite_count | bigint(20)          | YES  |     | NULL    |                |
+| comment_count  | bigint(20)          | YES  |     | NULL    |                |
+| is_favorite    | tinyint(1)          | YES  |     | NULL    |                |
+| user_id        | bigint(20)          | NO   |     | NULL    |                |
++----------------+---------------------+------+-----+---------+----------------+
 */
 // 从视频流中截取封面
 // 测试完毕，可以从视频中截取封面（测试时函数做了修改，返回img image.Image）
@@ -156,7 +155,7 @@ func (c *PublishSrv) PubList (ctx context.Context, request *service.PublishListR
 	var response service.PublishListResponse
 	response.StatusCode = 0
 	//response.StatusMsg = util.NewString("OK")
-	response.StatusCode = "OK"
+	response.StatusMsg = "OK"
 	// videos, err := m.localer.QueryVideosByUserId(tmpUserId)
 	// if err != nil {
 	// 	fmt.Println(err)
@@ -169,8 +168,8 @@ func (c *PublishSrv) PubList (ctx context.Context, request *service.PublishListR
 			Author: &service.PubUser{
 				Id:            int64(user.ID),
 				Name:          user.Name,
-				FollowerCount: &user.FollowerCount,
-				FollowCount:   &user.FollowCount,
+				FollowerCount: user.FollowerCount,
+				FollowCount:   user.FollowCount,
 				IsFollow:      true,
 			},
 			PlayUrl:       obs.GetVideoPrefix() + v.PlayURL,

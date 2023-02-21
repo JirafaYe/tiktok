@@ -33,7 +33,7 @@ import (
 
 func main() {
 	s := grpc.NewServer()
-	service.RegisterPublishServer(s, &server.PublishServer{})
+	service.RegisterPublishServer(s, &server.PublishSrv{})
 
 	lis, err := net.Listen("tcp", ":8888")
 	if err != nil {

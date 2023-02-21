@@ -26,17 +26,17 @@ func TestPubAction(t *testing.T) {
 	defer conn.Close()
 
     c := service.NewPublishClient(conn)
-    tmpData, err := ioutil.ReadFile("test11.mp4")
+    tmpData, err := ioutil.ReadFile("test1.mp4")
     tmpRequest := &service.PublishActionRequest{
-		Token: "",
+		Token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwidXNlcm5hbWUiOiJoZXdlbiIsImV4cCI6MTY3NzU3MjczMCwiaXNzIjoidGlrdG9rLnVzZXIifQ.UYG47jJPtjfHb-MzhBOBoa7KTQFdrqSDayCWHP-TDUs",
 		Data:  tmpData,
-		Title: "the Galaxy",12
+		Title: "the Galaxy new",
 	}
 
     res, err := c.PubAction(context.Background(), tmpRequest)
     if err!= nil {
-        t.Errorf("error creating: %v", err)123
-    }1
+        t.Errorf("error creating: %v", err)
+    }
     fmt.Println(res.StatusCode)
     fmt.Println(res.StatusMsg)
 }

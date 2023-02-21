@@ -12,7 +12,7 @@ import (
 )
 
 func TestFeedServer_FeedVideo(t *testing.T) {
-	conn, err := grpc.Dial("192.168.79.83:8899", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.Dial("127.0.0.1:8899", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		fmt.Println(err)
 	}

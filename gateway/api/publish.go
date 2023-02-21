@@ -33,17 +33,16 @@ func (m *Manager) RoutePublish() {
 	// group := m.handler.Group("/douyin/publish")
 	// group.POST("/action", m.publishAction)
 	// group.Get("/list", m.publishList)
-	m.handler.POST("/douyin/publish/action", m.publishAction)
-	m.handler.GET("/douyin/publish/list", m.publishList)
+	m.handler.POST("/douyin/publish/action/", m.publishAction)
+	m.handler.GET("/douyin/publish/list/", m.publishList)
 }
 
 //TODO_hewen 修改并完善publishAction
 func (m *Manager) publishAction(ctx *gin.Context) {
 	// ctx 会检索URL
     token := ctx.PostForm("token")
-    title := ctx.PostForm("title")
-	// token := ctx.Query("token")// string
-	// title := ctx.Query("title")// string
+    title := ctx.PostForm("title")	
+	// fmt.Printf("gateway publish query title: %s\n", title)
 	// 使用FormFile从请求中读取文件，文件类型
 	fileHeader, err := ctx.FormFile("data")// file, type is "multipart.FileHeader"
 	if err != nil {
@@ -86,7 +85,7 @@ func (m *Manager) publishAction(ctx *gin.Context) {
 		StatusCode: int64(rpcResponse.StatusCode),
 		StatusMsg: &rpcResponse.StatusMsg,
 	}
-	ctx.JSON(int(http.StatusOK), gin.H{
+	ctx.JSON(http.StatusOK, gin.H{
 		"status_code": response.StatusCode,
 		"status_msg":  response.StatusMsg,
 	})
@@ -130,21 +129,24 @@ type PubUser struct {
 func (m *Manager) publishList(ctx *gin.Context) {
 	// ctx 会检索URL
 	// TODO: PostForm还是query?
-    token := ctx.PostForm("token")
-    tmpUserID := ctx.PostForm("user_id")
-	userID, err := strconv.ParseInt(tmpUserID, 10, 64)
-	if err != nil {
-		ctx.JSON(1, gin.H{"msg": "上传的id错误", "data": nil})
-	}
+	// fmt.Printf("\033[1;37;41m%s\033[0m\n","gateway publish test")
+    token := ctx.Query("token")
+	
+    tmpUserID := ctx.Query("user_id")
+	userID, _ := strconv.ParseInt(tmpUserID, 10, 64)
+	// if err != nil {
+	// 	ctx.JSON(1, gin.H{"msg": "上传的id错误", "data": nil})
+	// }
+	// fmt.Printf("\033[1;37;41m%s\033[0m\n","gateway publish test: happend before rpc")
 	// center.Resolver() 参数为调用的服务名
 	// 该函数会进行自动负载均衡并返回一个*grpc.ClientConn
+	
 	conn, err := center.Resolver("publish")
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	defer conn.Close() 
-
 	client := service.NewPublishClient(conn)
 	rpcResponse, err := client.PubList(context.Background(), &service.PublishListRequest{
 		Token:  token,

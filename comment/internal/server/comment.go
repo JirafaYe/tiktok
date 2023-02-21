@@ -2,10 +2,13 @@ package server
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/JirafaYe/comment/internal/service"
 	"github.com/JirafaYe/comment/internal/store/local"
+	"github.com/JirafaYe/comment/pkg"
 	"log"
+	"sync"
 )
 
 type CommentServer struct {
@@ -13,22 +16,50 @@ type CommentServer struct {
 }
 
 func (c *CommentServer) ListComments(ctx context.Context, req *service.ListRequest) (*service.ListCommentsResponse, error) {
-	//测试user
-	user := &service.CommentUser{
-		Id:   1,
-		Name: "user",
+	resp, paresErr := pkg.ParseToken(req.Token)
+	if paresErr != nil {
+		log.Println("解析token失败", paresErr)
+		return nil, errors.New("解析token失败")
+	} else if !m.cacher.IsUserTokenExist(resp.Username) {
+		log.Println("用户token不存在")
+		return nil, errors.New("token登录验证失败")
 	}
 
 	commentList, err := m.localer.SelectCommentListByVideoId(req.VideoId)
 	if err != nil {
 		log.Println("获取评论列表失败", err)
-		return nil, err
+		return nil, errors.New("获取评论列表失败")
 	}
 
+	var ids []int64
 	list := make([]*service.CommentBody, len(commentList))
+	userMap := make(map[int64]*service.CommentUser)
+	id := make(map[int64]interface{})
+
+	for _, comment := range commentList {
+		id[comment.AuthorId] = nil
+	}
+
+	for k, _ := range id {
+		ids = append(ids, k)
+	}
+
+	if len(ids) != 0 {
+		msg, err := m.localer.GetUserMsg(ids)
+		if err != nil {
+			log.Println("获取用户信息失败")
+			return nil, errors.New("获取用户信息失败")
+		}
+
+		for _, user := range msg {
+			//log.Println(user)
+			userMap[user.Id] = &user
+		}
+	}
 
 	for i, comment := range commentList {
-		list[i] = ConvertCommentBody(comment, user)
+		//log.Println(userMap[comment.AuthorId], comment.AuthorId)
+		list[i] = ConvertCommentBody(comment, userMap[comment.AuthorId])
 	}
 
 	return &service.ListCommentsResponse{
@@ -41,22 +72,71 @@ func (c *CommentServer) ListComments(ctx context.Context, req *service.ListReque
 func (c *CommentServer) OperateComment(ctx context.Context, req *service.CommentRequest) (*service.CommentOperationResponse, error) {
 	comment := ConvertCommentRequest(req)
 
-	//测试user
-	user := &service.CommentUser{
-		Id:   1,
-		Name: "user",
+	resp, paresErr := pkg.ParseToken(req.Token)
+	if paresErr != nil {
+		log.Println("解析token失败", paresErr)
+		return nil, errors.New("解析token失败")
+	} else if !m.cacher.IsUserTokenExist(resp.Username) {
+		log.Println("用户token不存在")
+		return nil, errors.New("token登录验证失败")
 	}
 
+	user := &service.CommentUser{
+		Id:   resp.Id,
+		Name: resp.Username,
+	}
+	comment.AuthorId = resp.Id
+
 	var err error
+	var wg sync.WaitGroup
+	wg.Add(2)
+
 	if req.ActionType == 1 {
-		err = m.localer.InsertComment(&comment)
+		ok, err := m.localer.SelectVideoById(comment.VideoId)
+		if !ok || err != nil {
+			log.Println("校验视频合法性失败")
+			return nil, errors.New("校验视频合法性失败")
+		}
+		go func() {
+			err = m.localer.InsertComment(&comment)
+			if err != nil {
+				log.Print("插入评论失败", err)
+				err = errors.New("插入评论失败")
+				//return nil, errors.New("插入评论失败")
+			}
+			wg.Done()
+		}()
+		go func() {
+			m.localer.UpdateCommentsCountByVideoId(comment.VideoId, 1)
+			if err != nil {
+				log.Print("插入评论失败", err)
+				err = errors.New("插入评论失败")
+			}
+			wg.Done()
+		}()
+		wg.Wait()
 		if err != nil {
-			log.Print("插入评论失败", err)
+			return nil, err
 		}
 	} else if req.ActionType == 2 {
-		err = m.localer.DeleteComment(comment)
+		go func() {
+			err = m.localer.DeleteComment(comment)
+			if err != nil {
+				log.Print("删除评论失败: ", err)
+			}
+			wg.Done()
+		}()
+		go func() {
+			m.localer.UpdateCommentsCountByVideoId(comment.VideoId, -1)
+			if err != nil {
+				log.Print("减少评论数: ", err)
+				err = errors.New("减少评论数失败")
+			}
+			wg.Done()
+		}()
+		wg.Wait()
 		if err != nil {
-			log.Print("删除评论失败", err)
+			return nil, err
 		}
 	}
 

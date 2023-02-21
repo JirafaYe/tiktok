@@ -24,10 +24,13 @@ func (f *FeedServer) FeedVideo(ctx context.Context, request *service.TiktokFeedR
 	response.StatusMsg = util.NewString("OK")
 	t := time.UnixMilli(*request.LatestTime)
 	videos := m.localer.QueryVideosAfter(MaxNumVideos, t)
+	for _, v := range videos {
+		fmt.Println(v)
+	}
 	latestTime := time.Time{}.UnixMilli()
 	for _, v := range videos {
 		user := m.localer.QueryUserById(int64(v.UserId))
-		latestTime = util.Max(v.CreatedAt.UnixMilli(), latestTime)
+		latestTime = util.Min(v.CreatedAt.UnixMilli(), latestTime)
 		response.VideoList = append(response.VideoList, &service.VideoFeed{
 			Id: v.UserId,
 			Author: &service.UserFeed{
