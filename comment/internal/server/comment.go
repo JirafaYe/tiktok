@@ -8,6 +8,7 @@ import (
 	"github.com/JirafaYe/comment/internal/store/local"
 	"github.com/JirafaYe/comment/pkg"
 	"log"
+	"sync"
 )
 
 type CommentServer struct {
@@ -43,19 +44,21 @@ func (c *CommentServer) ListComments(ctx context.Context, req *service.ListReque
 		ids = append(ids, k)
 	}
 
-	msg, err := m.localer.GetUserMsg(ids)
-	if err != nil {
-		log.Println("获取用户信息失败")
-		return nil, errors.New("获取用户信息失败")
-	}
+	if len(ids) != 0 {
+		msg, err := m.localer.GetUserMsg(ids)
+		if err != nil {
+			log.Println("获取用户信息失败")
+			return nil, errors.New("获取用户信息失败")
+		}
 
-	for _, user := range msg {
-		log.Println(user)
-		userMap[user.Id] = &user
+		for _, user := range msg {
+			//log.Println(user)
+			userMap[user.Id] = &user
+		}
 	}
 
 	for i, comment := range commentList {
-		log.Println(userMap[comment.AuthorId], comment.AuthorId)
+		//log.Println(userMap[comment.AuthorId], comment.AuthorId)
 		list[i] = ConvertCommentBody(comment, userMap[comment.AuthorId])
 	}
 
@@ -82,22 +85,59 @@ func (c *CommentServer) OperateComment(ctx context.Context, req *service.Comment
 		Id:   resp.Id,
 		Name: resp.Username,
 	}
+	comment.AuthorId = resp.Id
 
 	var err error
+	var wg sync.WaitGroup
+	wg.Add(2)
+
 	if req.ActionType == 1 {
-		err = m.localer.InsertComment(&comment)
-		if err != nil {
-			log.Print("插入评论失败", err)
-			return nil, errors.New("插入评论失败")
+		ok, err := m.localer.SelectVideoById(comment.VideoId)
+		if !ok || err != nil {
+			log.Println("校验视频合法性失败")
+			return nil, errors.New("校验视频合法性失败")
 		}
-		go m.localer.UpdateCommentsCountByVideoId(comment.VideoId, 1)
+		go func() {
+			err = m.localer.InsertComment(&comment)
+			if err != nil {
+				log.Print("插入评论失败", err)
+				err = errors.New("插入评论失败")
+				//return nil, errors.New("插入评论失败")
+			}
+			wg.Done()
+		}()
+		go func() {
+			m.localer.UpdateCommentsCountByVideoId(comment.VideoId, 1)
+			if err != nil {
+				log.Print("插入评论失败", err)
+				err = errors.New("插入评论失败")
+			}
+			wg.Done()
+		}()
+		wg.Wait()
+		if err != nil {
+			return nil, err
+		}
 	} else if req.ActionType == 2 {
-		err = m.localer.DeleteComment(comment)
+		go func() {
+			err = m.localer.DeleteComment(comment)
+			if err != nil {
+				log.Print("删除评论失败: ", err)
+			}
+			wg.Done()
+		}()
+		go func() {
+			m.localer.UpdateCommentsCountByVideoId(comment.VideoId, -1)
+			if err != nil {
+				log.Print("减少评论数: ", err)
+				err = errors.New("减少评论数失败")
+			}
+			wg.Done()
+		}()
+		wg.Wait()
 		if err != nil {
-			log.Print("删除评论失败: ", err)
-			return nil, errors.New("删除评论失败")
+			return nil, err
 		}
-		go m.localer.UpdateCommentsCountByVideoId(comment.VideoId, -1)
 	}
 
 	return &service.CommentOperationResponse{
