@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"github.com/JirafaYe/feed/internal/service"
 	"github.com/JirafaYe/feed/internal/store/obs"
 	"github.com/JirafaYe/feed/pkg"
@@ -9,7 +10,7 @@ import (
 )
 
 const (
-	MaxNumVideos = 3
+	MaxNumVideos = 2
 )
 
 type FeedServer struct {
@@ -32,7 +33,7 @@ func (f *FeedServer) FeedVideo(ctx context.Context, request *service.TiktokFeedR
 		user := m.localer.QueryUserById(int64(v.UserId))
 		latestTime = util.Min(v.CreatedAt.UnixMilli(), latestTime)
 		response.VideoList = append(response.VideoList, &service.VideoFeed{
-			Id: v.UserId,
+			Id: int64(v.ID),
 			Author: &service.UserFeed{
 				Id:            int64(user.ID),
 				Name:          user.Name,
@@ -48,6 +49,7 @@ func (f *FeedServer) FeedVideo(ctx context.Context, request *service.TiktokFeedR
 			Title:         v.Title,
 		})
 	}
+	fmt.Println("lat ", time.UnixMilli(latestTime))
 	response.NextTime = &latestTime
 	return &response, nil
 }
