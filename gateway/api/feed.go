@@ -41,7 +41,7 @@ type User struct {
 }
 
 func (m *Manager) RouteFeed() {
-	m.handler.GET("/douyin/feed", m.feed)
+	m.handler.GET("/douyin/feed/", m.feed)
 }
 
 func (m *Manager) feed(c *gin.Context) {
