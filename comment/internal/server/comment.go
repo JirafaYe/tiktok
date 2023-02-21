@@ -8,6 +8,7 @@ import (
 	"github.com/JirafaYe/comment/internal/store/local"
 	"github.com/JirafaYe/comment/pkg"
 	"log"
+	"sync"
 )
 
 type CommentServer struct {
@@ -87,6 +88,9 @@ func (c *CommentServer) OperateComment(ctx context.Context, req *service.Comment
 	comment.AuthorId = resp.Id
 
 	var err error
+	var wg sync.WaitGroup
+	wg.Add(2)
+
 	if req.ActionType == 1 {
 		ok, err := m.localer.SelectVideoById(comment.VideoId)
 		if !ok || err != nil {
@@ -100,23 +104,40 @@ func (c *CommentServer) OperateComment(ctx context.Context, req *service.Comment
 				err = errors.New("插入评论失败")
 				//return nil, errors.New("插入评论失败")
 			}
+			wg.Done()
+		}()
+		go func() {
 			m.localer.UpdateCommentsCountByVideoId(comment.VideoId, 1)
 			if err != nil {
 				log.Print("插入评论失败", err)
-				err = errors.New("校验视频合法性失败")
+				err = errors.New("插入评论失败")
 			}
+			wg.Done()
 		}()
+		wg.Wait()
 		if err != nil {
 			return nil, err
 		}
-		//go m.localer.UpdateCommentsCountByVideoId(comment.VideoId, 1)
 	} else if req.ActionType == 2 {
-		err = m.localer.DeleteComment(comment)
+		go func() {
+			err = m.localer.DeleteComment(comment)
+			if err != nil {
+				log.Print("删除评论失败: ", err)
+			}
+			wg.Done()
+		}()
+		go func() {
+			m.localer.UpdateCommentsCountByVideoId(comment.VideoId, -1)
+			if err != nil {
+				log.Print("减少评论数: ", err)
+				err = errors.New("减少评论数失败")
+			}
+			wg.Done()
+		}()
+		wg.Wait()
 		if err != nil {
-			log.Print("删除评论失败: ", err)
-			return nil, errors.New("删除评论失败")
+			return nil, err
 		}
-		go m.localer.UpdateCommentsCountByVideoId(comment.VideoId, -1)
 	}
 
 	return &service.CommentOperationResponse{
@@ -136,6 +157,7 @@ func ConvertCommentRequest(request *service.CommentRequest) local.Comment {
 }
 
 func ConvertCommentBody(c local.Comment, u *service.CommentUser) *service.CommentBody {
+	log.Println(c)
 	return &service.CommentBody{
 		Id:         c.Id,
 		User:       u,
