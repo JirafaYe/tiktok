@@ -10,7 +10,6 @@ import (
 	"github.com/JirafaYe/gateway/center"
 	"github.com/JirafaYe/gateway/service"
 	"github.com/gin-gonic/gin"
-	"fmt"
 
 	"strconv"
 )
@@ -134,7 +133,7 @@ func (m *Manager) publishList(ctx *gin.Context) {
     token := ctx.Query("token")
 	
     tmpUserID := ctx.Query("user_id")
-	// userID, _ := strconv.ParseInt(tmpUserID, 10, 64)
+	userID, _ := strconv.ParseInt(tmpUserID, 10, 64)
 	// if err != nil {
 	// 	ctx.JSON(1, gin.H{"msg": "上传的id错误", "data": nil})
 	// }

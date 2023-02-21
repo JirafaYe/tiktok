@@ -28,7 +28,7 @@ func TestPubAction(t *testing.T) {
     c := service.NewPublishClient(conn)
     tmpData, err := ioutil.ReadFile("test1.mp4")
     tmpRequest := &service.PublishActionRequest{
-		Token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MjI2NzY5Nzc5MDYwMTY2MjQ2NCwidXNlcm5hbWUiOiIxMzQ4NDc4NDAzQHFxLmNvbSIsImV4cCI6MTY3NzQyNjA4NSwiaXNzIjoidGlrdG9rLnVzZXIifQ.JGZqxB-unHziBS_AkxGGHJWJAR6VGYhTEFIQjrTXYfc",
+		Token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwidXNlcm5hbWUiOiJoZXdlbiIsImV4cCI6MTY3NzU3MjczMCwiaXNzIjoidGlrdG9rLnVzZXIifQ.UYG47jJPtjfHb-MzhBOBoa7KTQFdrqSDayCWHP-TDUs",
 		Data:  tmpData,
 		Title: "the Galaxy new",
 	}

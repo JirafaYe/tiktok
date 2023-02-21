@@ -94,7 +94,7 @@ func (m *Manager) CreateVideo(video *Video) error {
 // TODO: 验证正确性
 func (m *Manager) QueryVideosByUserId(userId int64) (videos []*Video) {
 	db := m.handler.Table("t_video")
-	db.Where("user_id = ?", userId).Order("created_date desc").Find(&videos)
+	db.Where("user_id = ?", userId).Order("created_at desc").Find(&videos)
 	return
 }
 

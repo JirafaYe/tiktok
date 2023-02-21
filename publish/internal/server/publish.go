@@ -33,6 +33,7 @@ func (c *PublishSrv) PubAction (ctx context.Context, request *service.PublishAct
         fmt.Printf("failed to parse token: %v", err)
     }
 	uid := claims.Id
+	fmt.Printf("uid: %v\n", uid)
 	// 暂时模拟uid
 	// rand.Seed(time.Now().UnixNano())
 	// uid := rand.Intn(10)+1
