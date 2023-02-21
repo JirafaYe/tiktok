@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"log"
 	"net/http"
@@ -76,10 +75,4 @@ func TestCommentListRoute(t *testing.T) {
 	assert.Equal(t, 0, int(resp.StatusCode))
 
 	log.Println(resp)
-}
-
-func route() *gin.Engine {
-	app := New()
-	app.loadRoute()
-	return app.handler
 }
