@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	MaxNumVideos = 1
+	MaxNumVideos = 3
 )
 
 type FeedServer struct {
@@ -23,11 +23,11 @@ func (f *FeedServer) FeedVideo(ctx context.Context, request *service.TiktokFeedR
 	response.StatusCode = 0
 	response.StatusMsg = util.NewString("OK")
 	t := time.UnixMilli(*request.LatestTime)
-	videos := m.localer.QueryVideosAfter(MaxNumVideos, t)
-	for _, v := range videos {
-		fmt.Println(v)
-	}
-	latestTime := time.Time{}.UnixMilli()
+	videos := m.localer.QueryVideosBefore(MaxNumVideos, t)
+	//for _, v := range videos {
+	//	fmt.Println(v)
+	//}
+	latestTime := time.Now().UnixMilli()
 	for _, v := range videos {
 		user := m.localer.QueryUserById(int64(v.UserId))
 		latestTime = util.Min(v.CreatedAt.UnixMilli(), latestTime)

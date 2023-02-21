@@ -23,7 +23,7 @@ type User struct {
 	FollowCount   int64  `gorm:"column:follow_count; type:bigint"`
 }
 
-func (m *Manager) QueryVideosAfter(n int, date time.Time) (videos []*Video) {
+func (m *Manager) QueryVideosBefore(n int, date time.Time) (videos []*Video) {
 	db := m.handler.Table("t_video")
 	db.Where("created_at < ?", date).Order("created_at desc").Limit(n).Find(&videos)
 	return
