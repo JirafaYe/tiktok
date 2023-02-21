@@ -157,7 +157,6 @@ func ConvertCommentRequest(request *service.CommentRequest) local.Comment {
 }
 
 func ConvertCommentBody(c local.Comment, u *service.CommentUser) *service.CommentBody {
-	log.Println(c)
 	return &service.CommentBody{
 		Id:         c.Id,
 		User:       u,
