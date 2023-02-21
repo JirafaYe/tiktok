@@ -10,8 +10,8 @@ import (
 )
 
 func (m *Manager) RouteFavorite() {
-	m.handler.POST("/douyin/favorite/action", m.favoriteAction)
-	m.handler.GET("/douyin/favorite/list", m.favoriteList)
+	m.handler.POST("/douyin/favorite/action/", m.favoriteAction)
+	m.handler.GET("/douyin/favorite/list/", m.favoriteList)
 }
 
 func (m *Manager) favoriteAction(ctx *gin.Context) {
