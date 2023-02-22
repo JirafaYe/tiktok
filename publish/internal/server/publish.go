@@ -9,14 +9,11 @@ import (
 	"image"
 	"os"
 	"log"
-	// "math/rand"
-	// "time"
 	"strings"
 	"github.com/gofrs/uuid"
 	ffmpeg "github.com/u2takey/ffmpeg-go"
 	"github.com/JirafaYe/publish/internal/service"
 	"github.com/JirafaYe/publish/internal/store/local"
-
 	// List
 	"github.com/JirafaYe/publish/internal/store/obs"
 	jwt"github.com/JirafaYe/publish/pkg/jwt"
@@ -151,15 +148,9 @@ func readFrameAsJpeg(filePath string) ([]byte, error) {
 // TODO: publish list 函数
 func (c *PublishSrv) PubList (ctx context.Context, request *service.PublishListRequest) (*service.PublishListResponse, error){
 	tmpUserId := request.UserId
-	
 	var response service.PublishListResponse
 	response.StatusCode = 0
-	//response.StatusMsg = util.NewString("OK")
 	response.StatusMsg = "OK"
-	// videos, err := m.localer.QueryVideosByUserId(tmpUserId)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
 	videos := m.localer.QueryVideosByUserId(tmpUserId)
 	for _, v := range videos {
 		user := m.localer.QueryUserById(int64(v.UserId))
