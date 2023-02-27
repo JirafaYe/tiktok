@@ -97,45 +97,14 @@ func (c *CommentServer) OperateComment(ctx context.Context, req *service.Comment
 			log.Println("校验视频合法性失败")
 			return nil, errors.New("校验视频合法性失败")
 		}
-		go func() {
-			err = m.localer.InsertComment(&comment)
-			if err != nil {
-				log.Print("插入评论失败", err)
-				err = errors.New("插入评论失败")
-				//return nil, errors.New("插入评论失败")
-			}
-			wg.Done()
-		}()
-		go func() {
-			m.localer.UpdateCommentsCountByVideoId(comment.VideoId, 1)
-			if err != nil {
-				log.Print("插入评论失败", err)
-				err = errors.New("插入评论失败")
-			}
-			wg.Done()
-		}()
-		wg.Wait()
+		err = m.localer.InsertComment(&comment)
 		if err != nil {
 			return nil, err
 		}
 	} else if req.ActionType == 2 {
-		go func() {
-			err = m.localer.DeleteComment(comment)
-			if err != nil {
-				log.Print("删除评论失败: ", err)
-			}
-			wg.Done()
-		}()
-		go func() {
-			m.localer.UpdateCommentsCountByVideoId(comment.VideoId, -1)
-			if err != nil {
-				log.Print("减少评论数: ", err)
-				err = errors.New("减少评论数失败")
-			}
-			wg.Done()
-		}()
-		wg.Wait()
+		err = m.localer.DeleteComment(comment)
 		if err != nil {
+			log.Print("删除评论失败: ", err)
 			return nil, err
 		}
 	}

@@ -10,6 +10,8 @@ import (
 	"google.golang.org/grpc"
 	"log"
 	"net"
+	"net/http"
+	_ "net/http/pprof"
 )
 
 var (
@@ -19,6 +21,11 @@ var (
 
 func main() {
 	flag.Parse()
+
+	//runtime.SetBlockProfileRate(1)
+	go func() {
+		http.ListenAndServe(":10001", nil)
+	}()
 
 	// 服务注册
 	err := center.Register(consul.AgentServiceRegistration{
