@@ -56,22 +56,36 @@ func (m *Manager) GetUserMsg(id []int64) ([]service.CommentUser, error) {
 }
 
 func (m *Manager) InsertComment(comment *Comment) error {
-	//isExisted, err := m.SelectVideoById(comment.VideoId)
-	//if err != nil {
-	//	return err
-	//}
-	//if !isExisted {
-	//	return errors.New("video_id不存在")
-	//}
-	return m.handler.Create(comment).Error
+	var err error
+	transaction := m.handler.Begin()
+
+	rows := transaction.Create(comment)
+	if rows.RowsAffected != 1 {
+		err = errors.New("插入失败")
+		transaction.Rollback()
+		return err
+	}
+	err = transaction.Model(&Video{}).Where("id = ?", comment.VideoId).
+		UpdateColumn("comment_count", gorm.Expr("comment_count + ?", 1)).Error
+	if err != nil {
+		transaction.Rollback()
+		return err
+	}
+	transaction.Commit()
+	return nil
 }
 
 func (m *Manager) DeleteComment(comment Comment) error {
-	tx := m.handler.Where("id = ?", comment.Id).Delete(&Comment{})
-	if tx.RowsAffected == 0 {
-		return errors.New("无效评论")
+	var err error
+
+	rows := m.handler.Where("id = ?", comment.Id).Delete(&Comment{})
+	if rows.RowsAffected != 1 {
+		err = errors.New("无效评论")
+		return err
 	}
-	return tx.Error
+
+	return m.UpdateCommentsCountByVideoId(comment.VideoId, -1)
+
 }
 
 // videoId合法性校验
